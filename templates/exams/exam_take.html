@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ exam.title }} — прохождение{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <div class="exam-timer" data-seconds-left="{{ seconds_left }}">
+            <span class="exam-timer__label">Осталось времени:</span>
+            <span class="exam-timer__value">--:--</span>
+        </div>
+
+        <h1 class="sec-title">{{ exam.title }}</h1>
+
+        <form method="post" action="{% url 'exams:take' attempt.pk %}" id="exam-form"
+              enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <ol class="exam-questions">
+                {% for name, field in form.fields.items %}
+                    {% if "_file" in name %}{% elif field.choices %}
+                        <li class="exam-q">
+                            <p class="exam-q__text">{{ field.label }}</p>
+                            {% for value, label in field.choices %}
+                                <label class="exam-choice">
+                                    <input type="{{ field.widget.input_type }}" name="{{ name }}" value="{{ value }}">
+                                    <span>{{ label }}</span>
+                                </label>
+                            {% endfor %}
+                        </li>
+                    {% else %}
+                        <li class="exam-q">
+                            <p class="exam-q__text">{{ field.label }}</p>
+                            <textarea class="input" name="{{ name }}" rows="6"
+                                      placeholder="Свободный ответ — проверит учитель"></textarea>
+                            <p class="form-hint">Файл к ответу (фото / аудио / PDF, необязательно):
+                                <input type="file" name="{{ name }}_file" class="input"></p>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+
+            <div class="exam-submit">
+                <button class="btn btn--primary btn--lg" type="submit">Завершить и отправить</button>
+                <p class="exam-note">Вопросы с выбором проверяются автоматически, свободные — учителем.</p>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/exam.js' %}" defer></script>
+{% endblock %}

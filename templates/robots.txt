@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /office/
+Disallow: /teacher/
+Disallow: /exams/
+Disallow: /assignments/
+Disallow: {{ site_url }}/media/
+Sitemap: {{ site_url }}/sitemap.xml

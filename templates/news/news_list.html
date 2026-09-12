@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Новости — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <p class="eyebrow reveal">Лента</p>
+        <h1 class="sec-title reveal">Новости платформы</h1>
+
+        <div class="post-grid post-grid--wide">
+            {% for post in posts %}
+                <a class="post-card reveal" href="{{ post.get_absolute_url }}">
+                    {% if post.cover %}<img class="post-card__img" src="{{ post.cover.url }}" alt="">{% endif %}
+                    <div class="post-card__body">
+                        <time class="post-card__date" datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"d.m.Y" }}</time>
+                        <h3 class="post-card__t">{{ post.title }}</h3>
+                        <p class="post-card__d">{{ post.excerpt|default:post.body|truncatewords:24 }}</p>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="sec-lead">Новостей пока нет.</p>
+            {% endfor %}
+        </div>
+
+        {% include "includes/pagination.html" %}
+    </div>
+</section>
+{% endblock %}

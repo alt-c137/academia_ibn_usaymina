@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Ошибка сервера — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap center">
+        <div class="error-code">500</div>
+        <h1 class="sec-title">Временная ошибка</h1>
+        <p class="sec-lead">Что-то пошло не так на сервере. Попробуйте открыть страницу позже.</p>
+        <a class="btn btn--primary" href="{% url 'core:home' %}">На главную</a>
+    </div>
+</section>
+{% endblock %}

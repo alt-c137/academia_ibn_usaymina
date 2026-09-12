@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Вопросы и ответы — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow reveal">Поддержка</p>
+        <h1 class="sec-title reveal">Часто задаваемые вопросы</h1>
+
+        <div class="faq-list">
+            {% for faq in faqs %}
+                <details class="faq reveal" {% if forloop.first %}open{% endif %}>
+                    <summary class="faq__q">{{ faq.question }}</summary>
+                    <div class="faq__a">{{ faq.answer|linebreaks }}</div>
+                </details>
+            {% empty %}
+                <p class="sec-lead">Не нашли ответа? <a href="{% url 'core:contact' %}">Напишите нам</a>.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

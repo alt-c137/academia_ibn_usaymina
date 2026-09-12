@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Академическая выписка — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow">Документы</p>
+        <h1 class="sec-title">Академическая выписка</h1>
+        <p class="sec-lead">
+            Вместо сертификата платформа выдаёт академическую выписку с оценками —
+            как на hdat.sa. Сформируйте выписку по каждому завершённому курсу;
+            документ можно распечатать. Код выписки служит для подтверждения подлинности.
+        </p>
+
+        {% for row in rows %}
+            <div class="transcript-card">
+                <div class="transcript-card__head">
+                    <h2 class="transcript-card__t">{{ row.enrollment.course.title }}</h2>
+                    {% if row.transcript %}
+                        <span class="badge badge--finished">Выписка {{ row.transcript.code }}</span>
+                    {% endif %}
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr><th>Составляющая</th><th>Максимум</th><th>Набрано</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Итоговый экзамен</td><td>70</td><td>{{ row.grade.exam }}</td></tr>
+                        <tr><td>Еженедельные задания</td><td>25</td><td>{{ row.grade.assignments }}</td></tr>
+                        <tr><td>Активность (встречи)</td><td>5</td><td>{{ row.grade.activity }}</td></tr>
+                        <tr class="is-total">
+                            <td><strong>Итог</strong> {% if row.grade.passed %}(зачёт от 60){% endif %}</td>
+                            <td>100</td>
+                            <td><strong>{{ row.grade.total }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                {% if row.transcript %}
+                    <div class="transcript-doc" id="transcript-{{ row.transcript.code }}">
+                        <div class="transcript-doc__ornament" aria-hidden="true">
+                            <img src="{% static 'img/ornament-divider.svg' %}" alt="">
+                        </div>
+                        <div class="transcript-doc__body">
+                            <p class="transcript-doc__org">{{ site.site_name|default:site_title }}</p>
+                            <h3>Академическая выписка</h3>
+                            <p>Студент: <strong>{{ row.transcript.student_name }}</strong></p>
+                            <p>Курс: <strong>{{ row.transcript.course_title }}</strong></p>
+                            <ul>
+                                <li>Экзамен: {{ row.transcript.exam_points }} / 70</li>
+                                <li>Задания: {{ row.transcript.assignment_points }} / 25</li>
+                                <li>Активность: {{ row.transcript.activity_points }} / 5</li>
+                                <li>Итог: <strong>{{ row.transcript.total_points }} / 100</strong> —
+                                    {{ row.transcript.passed|yesno:"ЗАЧТЕНО,НЕ ЗАЧТЕНО" }}</li>
+                            </ul>
+                            <p class="transcript-doc__meta">
+                                Код: {{ row.transcript.code }} ·
+                                Выдано: {{ row.transcript.created_at|date:"d.m.Y" }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="transcript-card__actions no-print">
+                        <button class="btn btn--ghost btn--sm" type="button" data-print="#transcript-{{ row.transcript.code }}">Печать</button>
+                        <form method="post" action="{% url 'grading:transcript' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="enrollment" value="{{ row.enrollment.pk }}">
+                            <button class="btn btn--ghost btn--sm" type="submit">Обновить данные</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <form method="post" action="{% url 'grading:transcript' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="enrollment" value="{{ row.enrollment.pk }}">
+                        <button class="btn btn--primary btn--sm" type="submit">Сформировать выписку</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p class="sec-lead">Вы ещё не записаны на курсы — выписка появится после записи.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

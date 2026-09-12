@@ -1,0 +1,121 @@
+{% comment %}
+Базовый шаблон всех страниц: шапка с навигацией, переключатель темы,
+сообщения, подвал. Каждый конкретный шаблон расшиняет этот и заполняет
+блоки title / content (+ при необходимости extra_css / extra_js).
+{% endcomment %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="{{ request.theme|default:'paper' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_title|default:"Академия" }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}Дистанционное обучение: курсы, уроки, задания и экзамены с проверкой знаний.{% endblock %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+    <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+    <div class="wrap header__inner">
+        <a class="logo" href="{% url 'core:home' %}">
+            <img class="logo__img" src="{% static 'img/logo.svg' %}" alt="">
+            <span class="logo__text">{{ site_title }}</span>
+        </a>
+
+        <nav class="nav" id="nav">
+            <a class="nav__link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}"
+               href="{% url 'core:home' %}">Главная</a>
+            <a class="nav__link {% if request.resolver_match.app_name == 'courses' %}is-active{% endif %}"
+               href="{% url 'courses:list' %}">Курсы</a>
+            {% if has_library %}
+                <a class="nav__link {% if request.resolver_match.app_name == 'library' %}is-active{% endif %}"
+                   href="{% url 'library:index' %}">Библиотека</a>
+            {% endif %}
+            {% if has_news %}
+                <a class="nav__link {% if request.resolver_match.url_name == 'list' %}is-active{% endif %}"
+                   href="{% url 'news:list' %}">Новости</a>
+                <a class="nav__link {% if request.resolver_match.url_name == 'faq' %}is-active{% endif %}"
+                   href="{% url 'news:faq' %}">Вопросы</a>
+            {% endif %}
+            <a class="nav__link {% if request.resolver_match.url_name == 'contact' %}is-active{% endif %}"
+               href="{% url 'core:contact' %}">Контакты</a>
+        </nav>
+
+        <div class="header__actions">
+            <div class="theme-switch" title="Оформление">
+                <button class="theme-switch__btn" data-set-theme="paper" type="button">Классика</button>
+                <button class="theme-switch__btn" data-set-theme="sand" type="button">Минимал</button>
+            </div>
+
+            {% if user.is_authenticated %}
+                {% if user_is_teacher %}
+                    <a class="btn btn--ghost btn--sm teacher-link" href="{% url 'teacher:dashboard' %}">
+                        Учительская{% if teacher_pending %} <span class="badge badge--registration">{{ teacher_pending }}</span>{% endif %}
+                    </a>
+                {% endif %}
+                <a class="btn btn--ghost btn--sm" href="{% url 'grading:office' %}">Кабинет</a>
+            {% else %}
+                <a class="btn btn--ghost btn--sm" href="{% url 'accounts:login' %}">Войти</a>
+                <a class="btn btn--primary btn--sm" href="{% url 'accounts:register' %}">Записаться</a>
+            {% endif %}
+
+            <button class="burger" id="burger" type="button" aria-label="Меню">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</header>
+
+{% include "includes/messages.html" %}
+
+<main class="site-main">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="wrap footer__inner">
+        <div class="footer__brand">
+            <img class="footer__logo" src="{% static 'img/logo.svg' %}" alt="">
+            <div>
+                <div class="footer__name">{% firstof site.site_name site_title "Академия" %}</div>
+                {% if site and site.tagline %}<p class="footer__tagline">{{ site.tagline }}</p>{% endif %}
+            </div>
+        </div>
+
+        <nav class="footer__nav">
+            <a href="{% url 'courses:list' %}">Курсы</a>
+            {% if has_library %}<a href="{% url 'library:index' %}">Библиотека</a>{% endif %}
+            {% if has_news %}
+                <a href="{% url 'news:list' %}">Новости</a>
+                <a href="{% url 'news:faq' %}">Вопросы</a>
+            {% endif %}
+            <a href="{% url 'core:contact' %}">Контакты</a>
+        </nav>
+
+        <div class="footer__contacts">
+            {% if site %}
+                {% if site.whatsapp %}
+                    <a href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>
+                {% endif %}
+                {% if site.telegram %}
+                    <a href="https://t.me/{{ site.telegram|cut:'@' }}" target="_blank" rel="noopener">Telegram</a>
+                {% endif %}
+                {% if site.email %}
+                    <a href="mailto:{{ site.email }}">{{ site.email }}</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="wrap footer__bottom">
+        <span>© {% now "Y" %} {% firstof site.site_name site_title "Академия" %}. Все права защищены.</span>
+        {% if user.is_staff %}<a href="/admin/">Администрирование</a>{% endif %}
+    </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}" defer></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

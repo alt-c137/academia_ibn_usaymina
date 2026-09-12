@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Проверка ответа — Учительская{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <nav class="breadcrumbs">
+            <a href="{% url 'teacher:dashboard' %}">Учительская</a> /
+            <a href="{% url 'teacher:submissions' %}">Ответы на задания</a> /
+            <span>{{ submission.student }}</span>
+        </nav>
+
+        <span class="badge badge--{{ submission.status|default:'registration' }}">
+            {% if submission.status == 'graded' %}Проверено{% else %}Ждёт проверки{% endif %}
+        </span>
+        <h1 class="sec-title sec-title--sm">{{ submission.assignment.title }}</h1>
+        <p class="sec-lead">
+            {{ submission.assignment.course.title }} · неделя {{ submission.assignment.week }} ·
+            максимум {{ submission.assignment.max_points }} балл(ов)
+        </p>
+
+        <div class="card">
+            <div class="submission-meta">
+                <p><strong>Студент:</strong> {{ submission.student }}
+                    {% if submission.student.email %}({{ submission.student.email }}){% endif %}</p>
+                <p><strong>Отправлено:</strong> {{ submission.updated_at|date:"d.m.Y H:i" }}</p>
+            </div>
+
+            {% if submission.text %}
+                <h2 class="card__title">Текст ответа</h2>
+                <div class="rich-text">{{ submission.text|linebreaks }}</div>
+            {% endif %}
+
+            {% if submission.file %}
+                <h2 class="card__title">Файл ответа</h2>
+                {% if submission.is_image %}
+                    <a href="{{ submission.file.url }}" target="_blank" rel="noopener">
+                        <img class="submission-preview" src="{{ submission.file.url }}" alt="Ответ студента">
+                    </a>
+                {% elif submission.is_audio %}
+                    <audio controls src="{{ submission.file.url }}" preload="none">Аудио недоступно.</audio>
+                {% endif %}
+                <p><a class="btn btn--ghost btn--sm" href="{{ submission.file.url }}" target="_blank" rel="noopener">Открыть файл</a></p>
+            {% endif %}
+
+            <h2 class="card__title">Оценка</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.score.label }}: {{ form.score }} из {{ submission.assignment.max_points }}
+                {{ form.score.errors }}
+                {{ form.feedback }} {{ form.feedback.errors }}
+                <div class="hero__cta">
+                    <button class="btn btn--primary" type="submit">Сохранить оценку</button>
+                </div>
+                <p class="form-hint">Баллы можно не указывать — тогда сохранится только комментарий,
+                    и ответ останется в очереди проверки.</p>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

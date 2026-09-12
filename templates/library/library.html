@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Библиотека — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <p class="eyebrow reveal">Материалы</p>
+        <h1 class="sec-title reveal">Библиотека</h1>
+        <p class="sec-lead reveal">Книги, конспекты, аудио и видео — по категориям. Всё для углублённого изучения.</p>
+
+        <div class="lib-cats">
+            {% for category in categories %}
+                <a class="lib-cat reveal" href="{{ category.get_absolute_url }}">
+                    <span class="lib-cat__name">{{ category.name }}</span>
+                    <span class="lib-cat__count">{{ category.published_count }} материал{{ category.published_count|pluralize:"а,ов" }}</span>
+                </a>
+            {% empty %}
+                <p class="sec-lead">Категории скоро появятся.</p>
+            {% endfor %}
+        </div>
+
+        {% if latest_items %}
+            <h2 class="sec-title sec-title--sm reveal">Новые поступления</h2>
+            <div class="lib-grid">
+                {% for item in latest_items %}
+                    <a class="lib-item reveal" href="{% url 'library:item' item.pk %}">
+                        <span class="lib-item__type">{{ item.get_item_type_display }}</span>
+                        <span class="lib-item__t">{{ item.title }}</span>
+                        <span class="lib-item__d">{{ item.description|truncatewords:12 }}</span>
+                        <span class="lib-item__meta">{{ item.category.name }} · {{ item.views }} просмотр{{ item.views|pluralize:"а,ов" }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

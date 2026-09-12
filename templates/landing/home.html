@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ site_title }} — системное изучение шариатских наук{% endblock %}
+{% block description %}Дистанционное обучение по книгам с сопровождением: уроки, еженедельные задания, научные встречи и экзамены с проверкой знаний. Регистрация бесплатная.{% endblock %}
+
+{% block content %}
+
+{# ─────────────────── Hero: идея программы ─────────────────── #}
+<section class="hero" id="top">
+    <div class="wrap hero__inner">
+        <div class="hero__text">
+            <p class="eyebrow reveal">Программа обучения</p>
+            <h1 class="hero__title reveal">
+                Системное изучение исламских наук —<br>книга за книгой, шаг за шагом
+            </h1>
+            <p class="hero__lead reveal">
+                Самостоятельное чтение книг с сопровождением: уроки, еженедельные задания,
+                научные встречи с учителем и экзамены после каждой книги.
+                Прохождение предыдущих курсов не является условием — записаться можно на любой.
+            </p>
+            <div class="hero__cta reveal">
+                <a class="btn btn--primary btn--lg" href="{% url 'accounts:register' %}">Записаться бесплатно</a>
+                <a class="btn btn--ghost btn--lg" href="{% url 'courses:list' %}">Посмотреть курсы</a>
+            </div>
+            <ul class="hero__facts reveal">
+                {% if courses_count %}<li><strong>{{ courses_count }}</strong> курс{{ courses_count|pluralize:"а,ов" }} в программе</li>{% endif %}
+                <li><strong>100</strong> баллов максимум</li>
+                <li><strong>Бесплатно</strong> для всех желающих</li>
+            </ul>
+        </div>
+        <div class="hero__ornament reveal" aria-hidden="true">
+            <img src="{% static 'img/ornament-star.svg' %}" alt="">
+        </div>
+    </div>
+</section>
+
+{# ─────────────────── Идея программы ─────────────────── #}
+<section class="section section--mist" id="idea">
+    <div class="wrap">
+        <p class="eyebrow reveal">Идея</p>
+        <h2 class="sec-title reveal">Как устроено обучение</h2>
+        <p class="sec-lead reveal">
+            Программа — это последовательность курсов. Каждый курс — книга, разобранная
+            по урокам. Вы учитесь в своём темпе по недельным нормам, а платформа помогает
+            не сбиться: задания, встречи и финальная проверка знаний.
+        </p>
+        <div class="feat-grid">
+            <div class="feat reveal">
+                <div class="feat__ic">📖</div>
+                <h3 class="feat__t">Самостоятельное чтение</h3>
+                <p class="feat__d">Книга читается по недельным нормам — спокойно и вдумчиво, без спешки.</p>
+            </div>
+            <div class="feat reveal">
+                <div class="feat__ic">✍️</div>
+                <h3 class="feat__t">Еженедельные задания</h3>
+                <p class="feat__d">Закрепление прочитанного. Задания доступны до конца курса.</p>
+            </div>
+            <div class="feat reveal">
+                <div class="feat__ic">🎙️</div>
+                <h3 class="feat__t">Научные встречи</h3>
+                <p class="feat__d">Вопросы и ответы с учителем — разбор сложных тем курса.</p>
+            </div>
+            <div class="feat reveal">
+                <div class="feat__ic">✅</div>
+                <h3 class="feat__t">Экзамен после книги</h3>
+                <p class="feat__d">Итоговая проверка знаний с автоматической проверкой результата.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ─────────────────── Трек курсов ─────────────────── #}
+{% if programs %}
+<section class="section" id="courses">
+    <div class="wrap">
+        <p class="eyebrow reveal">Курсы программы</p>
+        <h2 class="sec-title reveal">Путь обучения</h2>
+        <p class="sec-lead reveal">
+            Регистрация открывается на курсы последовательно. Порядок изучения свободный —
+            начинайте с доступного.
+            <span class="hint">(свайпните по горизонтали, чтобы увидеть весь путь)</span>
+        </p>
+
+        {% for program in programs %}
+            {% if program.summary %}<p class="program-name reveal">{{ program.name }} · {{ program.summary }}</p>{% endif %}
+            <div class="track">
+                {% for course in program.courses.all %}
+                    {% if course.is_published %}
+                        <a class="tstop reveal {% if course.status == 'finished' %}is-done{% endif %}"
+                           href="{% url 'courses:detail' course.slug %}">
+                            <span class="tstop__top">
+                                <span class="tstop__node">{{ course.order }}</span>
+                                <span class="tstop__badge badge badge--{{ course.status }}">
+                                    {{ course.get_status_display }}
+                                </span>
+                            </span>
+                            <span class="tstop__ic" aria-hidden="true">
+                                {% if course.status == 'finished' %}✓
+                                {% elif course.status == 'active' %}●
+                                {% elif course.status == 'registration' %}✎
+                                {% else %}…{% endif %}
+                            </span>
+                            <span class="tstop__t">{{ course.title }}</span>
+                            {% if course.book %}<span class="tstop__b">{{ course.book }}</span>{% endif %}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{# ─────────────────── Текущий курс ─────────────────── #}
+{% if register_course or current_course %}
+<section class="section section--paper" id="current">
+    <div class="wrap">
+        <p class="eyebrow reveal">Сейчас открыто</p>
+        <h2 class="sec-title reveal">{% if register_course %}Идёт регистрация{% else %}Текущий курс{% endif %}</h2>
+
+        {% with course=register_course|default:current_course %}
+            <div class="ring-card reveal">
+                <div class="ring-card__body">
+                    <h3 class="ring-card__t">{{ course.title }}</h3>
+                    {% if course.book %}
+                        <p class="ring-card__b">{{ course.book }}{% if course.author %} — {{ course.author }}{% endif %}</p>
+                    {% endif %}
+                    <p class="ring-card__d">{{ course.summary|default:course.description|truncatewords:40 }}</p>
+
+                    <ul class="dates">
+                        {% if course.registration_start %}
+                            <li><span>Начало регистрации:</span> <strong>{{ course.registration_start|date:"d.m.Y" }}</strong></li>
+                        {% endif %}
+                        {% if course.registration_end %}
+                            <li><span>Конец регистрации:</span> <strong>{{ course.registration_end|date:"d.m.Y" }}</strong></li>
+                        {% endif %}
+                        {% if course.start_date %}
+                            <li><span>Начало учёбы:</span> <strong>{{ course.start_date|date:"d.m.Y" }}</strong></li>
+                        {% endif %}
+                    </ul>
+
+                    <div class="ring-card__cta">
+                        {% if course.registration_open %}
+                            <a class="btn btn--primary" href="{% url 'courses:enroll' course.slug %}">Записаться на курс</a>
+                        {% endif %}
+                        <a class="btn btn--ghost" href="{% url 'courses:detail' course.slug %}">Подробнее о курсе</a>
+                    </div>
+                </div>
+                <div class="ring-card__marks" aria-hidden="true">
+                    <div class="ring" data-value="70"><span class="ring__v">70</span><span class="ring__l">экзамен</span></div>
+                    <div class="ring" data-value="25"><span class="ring__v">25</span><span class="ring__l">задания</span></div>
+                    <div class="ring" data-value="5"><span class="ring__v">5</span><span class="ring__l">встречи</span></div>
+                </div>
+            </div>
+        {% endwith %}
+    </div>
+</section>
+{% endif %}
+
+{# ─────────────────── Метод обучения ─────────────────── #}
+<section class="section section--mist" id="study">
+    <div class="wrap">
+        <p class="eyebrow reveal">Метод</p>
+        <h2 class="sec-title reveal">Недельный цикл студента</h2>
+        <p class="sec-lead reveal">Каждая неделя курса проходит по одному и тому же маршруту — так проще не потерять ритм.</p>
+        <ol class="steps">
+            <li class="step reveal"><span class="step__n">1</span><div><h3>Вход в раздел курса</h3><p>Откройте страницу курса в личном кабинете.</p></div></li>
+            <li class="step reveal"><span class="step__n">2</span><div><h3>Чтение урока</h3><p>Урок недели: видео или аудио разбор, конспект, PDF-материалы.</p></div></li>
+            <li class="step reveal"><span class="step__n">3</span><div><h3>Задание</h3><p>Выполните еженедельное задание и отправьте ответ на проверку.</p></div></li>
+            <li class="step reveal"><span class="step__n">4</span><div><h3>Повторение</h3><p>Вспомогательные материалы и майнд-мэпы для закрепления.</p></div></li>
+            <li class="step reveal"><span class="step__n">5</span><div><h3>Финальный экзамен</h3><p>В конце курса — итоговый тест с автопроверкой результата.</p></div></li>
+        </ol>
+    </div>
+</section>
+
+{# ─────────────────── Оценивание ─────────────────── #}
+<section class="section section--paper" id="grades">
+    <div class="wrap">
+        <p class="eyebrow reveal">Оценивание</p>
+        <h2 class="sec-title reveal">Как выставляется итог</h2>
+        <p class="sec-lead reveal">
+            Максимум — 100 баллов: экзамен 70 + задания 25 + посещение встреч 5.
+            Порог зачёта — 60 баллов. Провал одного курса не влияет на остальные.
+            Сертификат не выдаётся — вместо него академическая выписка с оценками,
+            доступная для печати.
+        </p>
+        <div class="grade-rings reveal">
+            <div class="ring is-big" data-value="70"><span class="ring__v">70%</span><span class="ring__l">Экзамен</span></div>
+            <div class="ring is-big" data-value="25"><span class="ring__v">25%</span><span class="ring__l">Задания</span></div>
+            <div class="ring is-big" data-value="5"><span class="ring__v">5%</span><span class="ring__l">Встречи</span></div>
+        </div>
+        <p class="grade-note reveal">Порог зачёта — <strong>60 баллов</strong> из 100.</p>
+    </div>
+</section>
+
+{# ─────────────────── Новости ─────────────────── #}
+{% if latest_posts %}
+<section class="section" id="news">
+    <div class="wrap">
+        <p class="eyebrow reveal">Новости</p>
+        <h2 class="sec-title reveal">Последнее на платформе</h2>
+        <div class="post-grid">
+            {% for post in latest_posts %}
+                <a class="post-card reveal" href="{{ post.get_absolute_url }}">
+                    {% if post.cover %}<img class="post-card__img" src="{{ post.cover.url }}" alt="">{% endif %}
+                    <div class="post-card__body">
+                        <time class="post-card__date" datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"d.m.Y" }}</time>
+                        <h3 class="post-card__t">{{ post.title }}</h3>
+                        <p class="post-card__d">{{ post.excerpt|default:post.body|truncatewords:16 }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ─────────────────── Вопросы ─────────────────── #}
+{% if faqs %}
+<section class="section section--mist" id="faq">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow reveal">Вопросы</p>
+        <h2 class="sec-title reveal">Часто спрашивают</h2>
+        <div class="faq-list">
+            {% for faq in faqs %}
+                <details class="faq reveal">
+                    <summary class="faq__q">{{ faq.question }}</summary>
+                    <div class="faq__a">{{ faq.answer|linebreaks }}</div>
+                </details>
+            {% endfor %}
+        </div>
+        {% if has_news %}<p class="center"><a class="btn btn--ghost" href="{% url 'news:faq' %}">Все вопросы</a></p>{% endif %}
+    </div>
+</section>
+{% endif %}
+
+{# ─────────────────── Призыв + контакты ─────────────────── #}
+<section class="join" id="join">
+    <div class="wrap center">
+        <h2 class="join__title reveal">Начните учиться уже сегодня</h2>
+        <p class="join__lead reveal">Регистрация бесплатная. Запишитесь на открытый курс — и в первый же день получите доступ к урокам.</p>
+        <div class="hero__cta reveal">
+            <a class="btn btn--primary btn--lg" href="{% url 'accounts:register' %}">Создать аккаунт</a>
+            {% if site and site.whatsapp %}
+                <a class="btn btn--ghost btn--lg" href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">Написать в WhatsApp</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}

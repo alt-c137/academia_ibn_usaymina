@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Вход — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--form">
+        <p class="eyebrow">С возвращением</p>
+        <h1 class="sec-title">Вход</h1>
+
+        <form class="card" method="post">
+            {% csrf_token %}
+            <label class="label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {{ form.username.errors }}
+
+            <label class="label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+            {{ form.password }}
+            {{ form.password.errors }}
+            {{ form.non_field_errors }}
+
+            <button class="btn btn--primary btn--block" type="submit">Войти</button>
+        </form>
+
+        <p class="form-links">
+            <a href="{% url 'accounts:password_reset' %}">Забыли пароль?</a> ·
+            Нет аккаунта? <a href="{% url 'accounts:register' %}">Зарегистрироваться</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

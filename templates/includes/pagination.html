@@ -1,0 +1,12 @@
+{% comment %}Постраничная навигация для списков (новости и т.п.).{% endcomment %}
+{% if page_obj.has_other_pages %}
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a class="pagination__link" href="?page={{ page_obj.previous_page_number }}">&larr; Назад</a>
+        {% endif %}
+        <span class="pagination__info">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a class="pagination__link" href="?page={{ page_obj.next_page_number }}">Вперёд &rarr;</a>
+        {% endif %}
+    </nav>
+{% endif %}

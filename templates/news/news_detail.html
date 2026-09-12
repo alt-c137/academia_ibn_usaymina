@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <nav class="breadcrumbs">
+            <a href="{% url 'news:list' %}">Новости</a> / <span>{{ post.title }}</span>
+        </nav>
+
+        <time class="post-date" datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"d.m.Y" }}</time>
+        <h1 class="sec-title">{{ post.title }}</h1>
+
+        {% if post.cover %}
+            <img class="post-cover" src="{{ post.cover.url }}" alt="">
+        {% endif %}
+
+        <div class="rich-text">{{ post.body|linebreaks }}</div>
+    </div>
+</section>
+{% endblock %}

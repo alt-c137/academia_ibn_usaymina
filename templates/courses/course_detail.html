@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} — {{ site_title }}{% endblock %}
+{% block description %}{{ course.summary|default:course.title }}{% endblock %}
+
+{% block content %}
+<section class="section section--mist">
+    <div class="wrap">
+        <nav class="breadcrumbs">
+            <a href="{% url 'core:home' %}">Главная</a> /
+            <a href="{% url 'courses:list' %}">Курсы</a> /
+            <span>{{ course.title }}</span>
+        </nav>
+
+        <div class="course-head">
+            <div class="course-head__main">
+                <span class="badge badge--{{ course.status }}">{{ course.get_status_display }}</span>
+                <h1 class="sec-title">{{ course.title }}</h1>
+                {% if course.book %}
+                    <p class="course-head__book">{{ course.book }}{% if course.author %} — {{ course.author }}{% endif %}</p>
+                {% endif %}
+                {% if course.summary %}<p class="sec-lead">{{ course.summary }}</p>{% endif %}
+
+                <div class="course-head__actions">
+                    {% if enrollment %}
+                        <a class="btn btn--primary" href="#lessons">Продолжить обучение</a>
+                    {% elif course.registration_open %}
+                        <a class="btn btn--primary" href="{% url 'courses:enroll' course.slug %}">Записаться на курс</a>
+                    {% else %}
+                        <span class="badge badge--soon">Регистрация закрыта</span>
+                    {% endif %}
+                </div>
+
+                <ul class="dates dates--inline">
+                    {% if course.registration_start %}<li><span>Регистрация:</span> {{ course.registration_start|date:"d.m.Y" }} — {{ course.registration_end|date:"d.m.Y" }}</li>{% endif %}
+                    {% if course.start_date %}<li><span>Обучение:</span> {{ course.start_date|date:"d.m.Y" }} — {{ course.end_date|date:"d.m.Y" }}</li>{% endif %}
+                </ul>
+            </div>
+            {% if course.cover %}
+                <img class="course-head__cover" src="{{ course.cover.url }}" alt="">
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% if course.description %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow reveal">О курсе</p>
+        <div class="rich-text">{{ course.description|linebreaks }}</div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section {% if course.description %}section--mist{% endif %}" id="lessons">
+    <div class="wrap">
+        <p class="eyebrow reveal">Программа курса</p>
+        <h2 class="sec-title reveal">Уроки</h2>
+
+        {% if lessons %}
+            <ol class="lesson-list">
+                {% for lesson in lessons %}
+                    <li class="lesson-item reveal {% if lesson.pk in done_lesson_ids %}is-done{% endif %}">
+                        {% if enrollment %}
+                            <a class="lesson-item__link" href="{% url 'courses:lesson' course.slug lesson.order %}">
+                                <span class="lesson-item__n">{{ lesson.order }}</span>
+                                <span class="lesson-item__body">
+                                    <span class="lesson-item__t">{{ lesson.title }}</span>
+                                    {% if lesson.summary %}<span class="lesson-item__d">{{ lesson.summary|truncatewords:14 }}</span>{% endif %}
+                                </span>
+                                {% if lesson.pk in done_lesson_ids %}<span class="lesson-item__mark" title="Пройден">✓</span>{% endif %}
+                            </a>
+                        {% else %}
+                            <span class="lesson-item__link lesson-item__link--locked">
+                                <span class="lesson-item__n">{{ lesson.order }}</span>
+                                <span class="lesson-item__body">
+                                    <span class="lesson-item__t">{{ lesson.title }}</span>
+                                    {% if lesson.summary %}<span class="lesson-item__d">{{ lesson.summary|truncatewords:14 }}</span>{% endif %}
+                                </span>
+                                <span class="lesson-item__mark" title="Доступ после записи">🔒</span>
+                            </span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
+        {% else %}
+            <p class="sec-lead">Уроки скоро появятся.</p>
+        {% endif %}
+    </div>
+</section>
+
+{% if exams %}
+<section class="section">
+    <div class="wrap">
+        <p class="eyebrow reveal">Проверка знаний</p>
+        <h2 class="sec-title reveal">Тесты курса</h2>
+        <div class="exam-grid">
+            {% for exam in exams %}
+                <div class="exam-card reveal">
+                    <h3 class="exam-card__t">{{ exam.title }}</h3>
+                    <p class="exam-card__d">{{ exam.description|default:exam.get_kind_display }}</p>
+                    <ul class="exam-card__meta">
+                        <li>{{ exam.get_kind_display }}</li>
+                        <li>{{ exam.time_limit_min }} мин</li>
+                        <li>{{ exam.max_attempts }} попыт{{ exam.max_attempts|pluralize:"ка,ки,ок" }}</li>
+                        <li>зачёт от {{ exam.pass_percent }}%</li>
+                    </ul>
+                    {% if enrollment %}
+                        <a class="btn btn--ghost btn--sm" href="{% url 'exams:detail' exam.pk %}">Открыть</a>
+                    {% else %}
+                        <span class="badge badge--soon">Доступ после записи</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

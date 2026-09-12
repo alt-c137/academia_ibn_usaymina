@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} — Библиотека{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <nav class="breadcrumbs">
+            <a href="{% url 'library:index' %}">Библиотека</a> / <span>{{ category.name }}</span>
+        </nav>
+
+        <h1 class="sec-title">{{ category.name }}</h1>
+
+        <div class="lib-grid">
+            {% for item in items %}
+                <a class="lib-item reveal" href="{% url 'library:item' item.pk %}">
+                    <span class="lib-item__type">{{ item.get_item_type_display }}</span>
+                    <span class="lib-item__t">{{ item.title }}</span>
+                    <span class="lib-item__d">{{ item.description|truncatewords:12 }}</span>
+                    <span class="lib-item__meta">{{ item.views }} просмотр{{ item.views|pluralize:"а,ов" }}</span>
+                </a>
+            {% empty %}
+                <p class="sec-lead">В этой категории пока пусто.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

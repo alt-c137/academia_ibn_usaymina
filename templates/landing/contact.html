@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Контакты — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow center">
+        <p class="eyebrow">Связь</p>
+        <h1 class="sec-title">Контакты</h1>
+        <p class="sec-lead">Техническая поддержка платформы и вопросы по обучению.</p>
+
+        <div class="contact-list">
+            {% if site and site.whatsapp %}
+                <a class="contact-card" href="https://wa.me/{{ site.whatsapp }}" target="_blank" rel="noopener">
+                    <span class="contact-card__ic">💬</span>
+                    <span class="contact-card__t">WhatsApp</span>
+                    <span class="contact-card__d">+{{ site.whatsapp }}</span>
+                </a>
+            {% endif %}
+            {% if site and site.telegram %}
+                <a class="contact-card" href="https://t.me/{{ site.telegram|cut:'@' }}" target="_blank" rel="noopener">
+                    <span class="contact-card__ic">✈️</span>
+                    <span class="contact-card__t">Telegram</span>
+                    <span class="contact-card__d">@{{ site.telegram|cut:'@' }}</span>
+                </a>
+            {% endif %}
+            {% if site and site.email %}
+                <a class="contact-card" href="mailto:{{ site.email }}">
+                    <span class="contact-card__ic">✉️</span>
+                    <span class="contact-card__t">Почта</span>
+                    <span class="contact-card__d">{{ site.email }}</span>
+                </a>
+            {% endif %}
+        </div>
+
+        <p class="sec-lead">Перед написанием загляните в <a href="{% url 'news:faq' %}">вопросы и ответы</a> — возможно, ответ уже там.</p>
+    </div>
+</section>
+{% endblock %}

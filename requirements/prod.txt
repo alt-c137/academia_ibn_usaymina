@@ -1,0 +1,4 @@
+# Зависимости для продакшена (PostgreSQL + Gunicorn за Nginx).
+-r base.txt
+psycopg[binary]>=3.2,<4   # драйвер PostgreSQL
+gunicorn>=23.0,<24        # WSGI-сервер приложения

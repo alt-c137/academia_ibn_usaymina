@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Учительская — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <div class="office-head">
+            <div>
+                <p class="eyebrow">Рабочее место учителя</p>
+                <h1 class="sec-title">Учительская</h1>
+            </div>
+            <div class="office-head__actions">
+                <a class="btn btn--ghost btn--sm" href="/admin/">Админка (контент)</a>
+                <a class="btn btn--ghost btn--sm" href="{% url 'core:home' %}">На сайт</a>
+            </div>
+        </div>
+
+        <div class="office-block">
+            <h2 class="office-block__t">
+                Ответы на задания
+                {% if pending_submissions_count %}
+                    <span class="badge badge--registration">ждут проверки: {{ pending_submissions_count }}</span>
+                {% endif %}
+            </h2>
+            {% if pending_submissions %}
+                <table class="table">
+                    <thead>
+                        <tr><th>Студент</th><th>Задание</th><th>Курс</th><th>Отправлено</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in pending_submissions %}
+                            <tr>
+                                <td>{{ submission.student }}</td>
+                                <td>{{ submission.assignment.title }}</td>
+                                <td>{{ submission.assignment.course.title }}</td>
+                                <td>{{ submission.updated_at|date:"d.m.y H:i" }}</td>
+                                <td><a class="btn btn--primary btn--sm" href="{% url 'teacher:submission' submission.pk %}">Проверить</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p><a class="btn btn--ghost btn--sm" href="{% url 'teacher:submissions' %}">Все ответы</a></p>
+            {% else %}
+                <p class="sec-lead">Новых ответов нет — всё проверено. 🌿</p>
+                <p><a class="btn btn--ghost btn--sm" href="{% url 'teacher:submissions' %}">Все ответы</a></p>
+            {% endif %}
+        </div>
+
+        <div class="office-block">
+            <h2 class="office-block__t">
+                Экзамены: свободные ответы
+                {% if pending_attempts_count %}
+                    <span class="badge badge--registration">ждут оценки: {{ pending_attempts_count }}</span>
+                {% endif %}
+            </h2>
+            {% if pending_attempts %}
+                <table class="table">
+                    <thead>
+                        <tr><th>Студент</th><th>Тест</th><th>Сдан</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in pending_attempts %}
+                            <tr>
+                                <td>{{ attempt.student }}</td>
+                                <td>{{ attempt.exam.title }}</td>
+                                <td>{{ attempt.finished_at|date:"d.m.y H:i" }}</td>
+                                <td><a class="btn btn--primary btn--sm" href="{% url 'teacher:attempt' attempt.pk %}">Оценить</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p><a class="btn btn--ghost btn--sm" href="{% url 'teacher:attempts' %}">Все попытки</a></p>
+            {% else %}
+                <p class="sec-lead">Нет ответов, ожидающих ручной оценки.</p>
+                <p><a class="btn btn--ghost btn--sm" href="{% url 'teacher:attempts' %}">Все попытки</a></p>
+            {% endif %}
+        </div>
+
+        <div class="office-block">
+            <h2 class="office-block__t">Подсказки</h2>
+            <ul class="hint-list">
+                <li>Добавить урок / тест / задание / книгу — в <a href="/admin/">админке</a>.</li>
+                <li>Назначить ещё учителя: админка → Пользователи → выбрать студента →
+                    галочка «персонал» или группа «Учитель».</li>
+                <li>Включить приём решений через WhatsApp/Telegram (если сайт недоступен):
+                    админка → Ядро платформы → Контакты сайта.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}

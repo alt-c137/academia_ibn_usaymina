@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 28" fill="none">
+  <!-- Разделитель-орнамент: линия со звездой -->
+  <line x1="0" y1="14" x2="95" y2="14" stroke="#7D5A22" stroke-width="1"/>
+  <line x1="145" y1="14" x2="240" y2="14" stroke="#7D5A22" stroke-width="1"/>
+  <g stroke="#7D5A22" stroke-width="1.2">
+    <rect x="12" y="12" width="4" height="4" transform="translate(106 0)"/>
+    <rect x="12" y="12" width="4" height="4" transform="rotate(45 14 14) translate(106 0)"/>
+  </g>
+  <circle cx="120" cy="14" r="2.4" fill="#7D5A22"/>
+</svg>

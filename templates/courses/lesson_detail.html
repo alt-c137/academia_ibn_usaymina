@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Урок {{ lesson.order }}. {{ lesson.title }} — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <nav class="breadcrumbs">
+            <a href="{% url 'core:home' %}">Главная</a> /
+            <a href="{% url 'courses:list' %}">Курсы</a> /
+            <a href="{% url 'courses:detail' course.slug %}">{{ course.title }}</a> /
+            <span>Урок {{ lesson.order }}</span>
+        </nav>
+
+        <div class="lesson-head">
+            <span class="badge badge--active">Неделя {{ lesson.week }}</span>
+            <h1 class="lesson-head__t">{{ lesson.order }}. {{ lesson.title }}</h1>
+            {% if lesson.summary %}<p class="sec-lead">{{ lesson.summary }}</p>{% endif %}
+        </div>
+
+        <div class="lesson-body">
+            {% if lesson.video_embed_url %}
+                <div class="lesson-video">
+                    <iframe src="{{ lesson.video_embed_url }}" title="Видео урока"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen loading="lazy"></iframe>
+                </div>
+            {% endif %}
+
+            {% if lesson.audio %}
+                <div class="lesson-audio">
+                    <p class="eyebrow">Аудиоверсия</p>
+                    <audio controls src="{{ lesson.audio.url }}" preload="none">Ваш браузер не поддерживает аудио.</audio>
+                </div>
+            {% endif %}
+
+            {% if lesson.content %}
+                <div class="rich-text">{{ lesson.content|linebreaks }}</div>
+            {% endif %}
+
+            {% if lesson.document %}
+                <a class="btn btn--ghost" href="{{ lesson.document.url }}" target="_blank" rel="noopener">
+                    📄 Скачать PDF урока
+                </a>
+            {% endif %}
+        </div>
+
+        <form class="lesson-done" method="post"
+              action="{% url 'courses:lesson_complete' course.slug lesson.order %}">
+            {% csrf_token %}
+            <button class="btn {% if is_done %}btn--ghost{% else %}btn--primary{% endif %}" type="submit">
+                {% if is_done %}✓ Пройдено — отменить{% else %}Отметить пройденным{% endif %}
+            </button>
+        </form>
+
+        <nav class="lesson-nav">
+            {% if prev_lesson %}
+                <a class="btn btn--ghost" href="{% url 'courses:lesson' course.slug prev_lesson.order %}">
+                    &larr; Урок {{ prev_lesson.order }}
+                </a>
+            {% endif %}
+            <a class="btn btn--ghost" href="{% url 'courses:detail' course.slug %}">Все уроки</a>
+            {% if next_lesson %}
+                <a class="btn btn--ghost" href="{% url 'courses:lesson' course.slug next_lesson.order %}">
+                    Урок {{ next_lesson.order }} &rarr;
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+</section>
+{% endblock %}

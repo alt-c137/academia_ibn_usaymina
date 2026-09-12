@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Логотип: восьмиконечная звезда (руб эль-хизб) -->
+  <rect x="19" y="19" width="26" height="26" stroke="#A97E22" stroke-width="2.4"/>
+  <rect x="19" y="19" width="26" height="26" stroke="#A97E22" stroke-width="2.4" transform="rotate(45 32 32)"/>
+  <circle cx="32" cy="32" r="5.5" fill="#2F6B52"/>
+</svg>

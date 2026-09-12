@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ exam.title }} — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <nav class="breadcrumbs">
+            <a href="{% url 'courses:detail' exam.course.slug %}">{{ exam.course.title }}</a> /
+            <span>{{ exam.title }}</span>
+        </nav>
+
+        <h1 class="sec-title">{{ exam.title }}</h1>
+        <p class="sec-lead">{{ exam.description|default:"Проверьте свои знания по курсу." }}</p>
+
+        <div class="exam-rules">
+            <ul>
+                <li>Тип: <strong>{{ exam.get_kind_display }}</strong></li>
+                <li>Время: <strong>{{ exam.time_limit_min }} минут</strong></li>
+                <li>Попыток использовано: <strong>{{ attempts_used }} из {{ exam.max_attempts }}</strong></li>
+                <li>Зачёт от: <strong>{{ exam.pass_percent }}%</strong></li>
+                {% if best %}
+                    <li>Лучший результат: <strong>{{ best.score_percent }}% ({{ best.passed|yesno:"зачёт,не зачтено" }})</strong></li>
+                {% endif %}
+            </ul>
+            <p class="exam-note">
+                Отвечайте спокойно: незакрытые вопросы приносят 0 баллов, но не блокируют отправку.
+                Время отсчитывается от старта попытки.
+                {% if has_open_questions %}
+                    В тесте есть вопросы со свободным ответом — их проверит учитель вручную,
+                    итоговый балл появится после проверки.
+                {% endif %}
+            </p>
+        </div>
+
+        {% if not enrollment %}
+            <p class="msg msg--warning">Тест доступен только студентам, записанным на курс.
+                <a href="{% url 'courses:detail' exam.course.slug %}">Записаться</a></p>
+        {% elif attempts_left <= 0 %}
+            <p class="msg msg--warning">Лимит попыток исчерпан. Результаты смотрите в
+                <a href="{% url 'grading:office' %}">кабинете</a>.</p>
+        {% else %}
+            <form method="post" action="{% url 'exams:start' exam.pk %}">
+                {% csrf_token %}
+                <button class="btn btn--primary btn--lg" type="submit">Начать тест (попыток: {{ attempts_left }})</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load app_tags %}
+
+{% block title %}Кабинет студента — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <div class="office-head">
+            <div>
+                <p class="eyebrow">Кабинет</p>
+                <h1 class="sec-title">Мерхаба, {{ user.first_name|default:user.email }}!</h1>
+            </div>
+            <div class="office-head__actions">
+                <a class="btn btn--ghost btn--sm" href="{% url 'accounts:profile' %}">Профиль</a>
+                <a class="btn btn--ghost btn--sm" href="{% url 'grading:transcript' %}">Выписка</a>
+                <form method="post" action="{% url 'accounts:logout' %}">
+                    {% csrf_token %}
+                    <button class="btn btn--ghost btn--sm" type="submit">Выйти</button>
+                </form>
+            </div>
+        </div>
+
+        {# ─── Задания к сдаче ─── #}
+        {% if pending_assignments %}
+            <div class="office-block">
+                <h2 class="office-block__t">Задания к сдаче</h2>
+                <ul class="task-list">
+                    {% for assignment in pending_assignments %}
+                        <li class="task-list__item">
+                            <a href="{% url 'assignments:detail' assignment.pk %}">
+                                <strong>{{ assignment.course.title }}</strong> — {{ assignment.title }}
+                            </a>
+                            {% if assignment.due_at %}
+                                <span class="task-list__due">до {{ assignment.due_at|date:"d.m.Y H:i" }}</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {# ─── Мои курсы ─── #}
+        <div class="office-block">
+            <h2 class="office-block__t">Мои курсы</h2>
+            {% if enrollments %}
+                <div class="office-courses">
+                    {% for enrollment in enrollments %}
+                        <div class="course-progress reveal">
+                            <div class="course-progress__head">
+                                <a class="course-progress__title" href="{% url 'courses:detail' enrollment.course.slug %}">
+                                    {{ enrollment.course.title }}
+                                </a>
+                                <span class="badge badge--{{ enrollment.course.status }}">{{ enrollment.course.get_status_display }}</span>
+                            </div>
+
+                            <div class="progress-bar">
+                                <div class="progress-bar__fill" style="width: {{ enrollment.percent }}%"></div>
+                            </div>
+                            <div class="course-progress__meta">
+                                Пройдено {{ enrollment.lessons_done }} из {{ enrollment.lessons_total }} уроков · {{ enrollment.percent }}%
+                            </div>
+
+                            {% with grade=grades|get_item:enrollment.pk %}
+                                <div class="course-progress__grade">
+                                    <span>Экзамен <strong>{{ grade.exam }}</strong>/70</span>
+                                    <span>Задания <strong>{{ grade.assignments }}</strong>/25</span>
+                                    <span>Активность <strong>{{ grade.activity }}</strong>/5</span>
+                                    <span class="course-progress__total {% if grade.passed %}is-passed{% endif %}">
+                                        Итог: <strong>{{ grade.total }}</strong>/100
+                                        {% if grade.passed %}(зачёт){% endif %}
+                                    </span>
+                                </div>
+                            {% endwith %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="sec-lead">Вы пока не записаны ни на один курс.
+                    <a href="{% url 'courses:list' %}">Выбрать курс</a></p>
+            {% endif %}
+        </div>
+
+        {# ─── Последние тесты ─── #}
+        {% if recent_attempts %}
+            <div class="office-block">
+                <h2 class="office-block__t">Последние тесты</h2>
+                <table class="table">
+                    <thead>
+                        <tr><th>Тест</th><th>Результат</th><th>Зачёт</th><th>Дата</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for attempt in recent_attempts %}
+                            <tr>
+                                <td><a href="{% url 'exams:result' attempt.pk %}">{{ attempt.exam.title }}</a></td>
+                                <td>{{ attempt.score_percent }}%</td>
+                                <td>{% if attempt.is_pending_manual %}<span class="badge badge--registration">на проверке</span>{% else %}{{ attempt.passed|yesno:"✓,✗" }}{% endif %}</td>
+                                <td>{{ attempt.finished_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

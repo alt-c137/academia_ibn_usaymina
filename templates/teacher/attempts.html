@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Экзамены: свободные ответы — Учительская{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <p class="eyebrow">Учительская</p>
+        <h1 class="sec-title">Экзамены: свободные ответы</h1>
+        <p class="sec-lead">Попытки, где остались вопросы с ручной проверкой.</p>
+
+        {% if attempts %}
+            <table class="table">
+                <thead>
+                    <tr><th>Студент</th><th>Тест</th><th>Курс</th><th>Ждут оценки</th><th>Сдан</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                        <tr>
+                            <td>{{ attempt.student }}</td>
+                            <td>{{ attempt.exam.title }}</td>
+                            <td>{{ attempt.exam.course.title }}</td>
+                            <td><span class="badge badge--registration">{{ attempt.pending }}</span></td>
+                            <td>{{ attempt.finished_at|date:"d.m.y H:i" }}</td>
+                            <td><a class="btn btn--primary btn--sm" href="{% url 'teacher:attempt' attempt.pk %}">Оценить</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="sec-lead">Все свободные ответы оценены. 🌿</p>
+        {% endif %}
+
+        {% include "includes/pagination.html" %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+# docker-compose: PostgreSQL для разработки/продакшена платформы.
+# Использование:
+#   docker compose up -d          — поднять базу
+#   в .env задать DB_ENGINE=postgres и параметры ниже
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: academy
+      POSTGRES_USER: academy
+      POSTGRES_PASSWORD: change-me
+    volumes:
+      - academy_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U academy -d academy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  academy_db:

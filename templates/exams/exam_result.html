@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Результат: {{ attempt.exam.title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <h1 class="sec-title">Результат</h1>
+        <p class="sec-lead">{{ attempt.exam.title }} · {{ attempt.exam.course.title }}</p>
+
+        {% if attempt.is_pending_manual %}
+            <div class="msg msg--info">
+                Ответы на свободные вопросы проверяет учитель. Итоговый балл ниже —
+                предварительный (без учёта ручной проверки). Финальный результат появится
+                здесь и в кабинете после проверки.
+            </div>
+        {% endif %}
+
+        <div class="exam-score {% if attempt.is_pending_manual %}is-pending{% elif attempt.passed %}is-passed{% else %}is-failed{% endif %}">
+            <div class="exam-score__value">{{ attempt.score_percent }}%</div>
+            <div class="exam-score__detail">
+                {% if attempt.is_pending_manual %}
+                    <strong>{{ attempt.status_label }}</strong> ·
+                {% endif %}
+                Баллы: {{ attempt.points_earned }} из {{ attempt.points_max }} ·
+                Зачёт от {{ attempt.exam.pass_percent }}% ·
+                <strong>{{ attempt.passed|yesno:"ЗАЧТЕНО, НЕ ЗАЧТЕНО" }}</strong>
+            </div>
+        </div>
+
+        <h2 class="sec-title sec-title--sm">Разбор ответов</h2>
+        <ol class="exam-review">
+            {% for answer in answers %}
+                <li class="exam-review__item {% if answer.needs_grading %}is-pending{% elif answer.is_correct %}is-correct{% else %}is-wrong{% endif %}">
+                    <p class="exam-review__q">{{ answer.question.text }}</p>
+                    {% if answer.needs_grading %}
+                        <p class="exam-review__mark">⏳ Ждёт оценки учителя
+                            {% if answer.text %}· ваш ответ: «{{ answer.text|truncatechars:80 }}»{% endif %}
+                            {% if answer.file %}· <a href="{{ answer.file.url }}">прикреплённый файл</a>{% endif %}
+                        </p>
+                    {% elif answer.question.q_type == 'open' %}
+                        <p class="exam-review__mark">✓ Оценено учителем (+{{ answer.points }})
+                            {% if answer.feedback %}· {{ answer.feedback }}{% endif %}
+                        </p>
+                    {% else %}
+                        <p class="exam-review__mark">
+                            {% if answer.is_correct %}✓ Верно (+{{ answer.points }}){% else %}✗ Неверно (0){% endif %}
+                        </p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+
+        <div class="hero__cta">
+            <a class="btn btn--primary" href="{{ next_url }}">В кабинет</a>
+            {% if attempt.exam.attempts_left == 0 %}
+            {% else %}
+                <a class="btn btn--ghost" href="{% url 'exams:detail' attempt.exam.pk %}">Ещё попытка</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

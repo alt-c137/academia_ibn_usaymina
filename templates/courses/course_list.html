@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Курсы — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <p class="eyebrow reveal">Каталог</p>
+        <h1 class="sec-title reveal">Курсы платформы</h1>
+        <p class="sec-lead reveal">Записывайтесь на открытые курсы. Порядок изучения свободный.</p>
+
+        {% for program in programs %}
+            <div class="program reveal">
+                <h2 class="program__name">{{ program.name }}</h2>
+                {% if program.summary %}<p class="program__summary">{{ program.summary }}</p>{% endif %}
+
+                <div class="course-grid">
+                    {% for course in program.courses.all %}
+                        {% if course.is_published %}
+                            <a class="course-card reveal" href="{% url 'courses:detail' course.slug %}">
+                                {% if course.cover %}
+                                    <img class="course-card__img" src="{{ course.cover.url }}" alt="">
+                                {% endif %}
+                                <div class="course-card__body">
+                                    <span class="badge badge--{{ course.status }}">{{ course.get_status_display }}</span>
+                                    <h3 class="course-card__t">{{ course.title }}</h3>
+                                    {% if course.book %}
+                                        <p class="course-card__b">{{ course.book }}{% if course.author %} · {{ course.author }}{% endif %}</p>
+                                    {% endif %}
+                                    <p class="course-card__d">{{ course.summary|truncatewords:18 }}</p>
+                                    <span class="course-card__meta">
+                                        {{ course.lessons.count }} урок{{ course.lessons.count|pluralize:"а,ов" }}
+                                        {% if course.registration_open %} · регистрация открыта{% endif %}
+                                    </span>
+                                </div>
+                            </a>
+                        {% endif %}
+                    {% empty %}
+                        <p class="sec-lead">В этой программе курсы скоро появятся.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% empty %}
+            <p class="sec-lead">Каталог наполняется. Загляните позже!</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

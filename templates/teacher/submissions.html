@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Ответы на задания — Учительская{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <p class="eyebrow">Учительская</p>
+        <h1 class="sec-title">Ответы на задания</h1>
+
+        <div class="filter-tabs">
+            <a class="filter-tabs__btn {% if current_status == 'submitted' %}is-active{% endif %}"
+               href="?status=submitted">Ждут проверки</a>
+            <a class="filter-tabs__btn {% if current_status == 'graded' %}is-active{% endif %}"
+               href="?status=graded">Проверено</a>
+            <a class="filter-tabs__btn {% if current_status == 'all' %}is-active{% endif %}"
+               href="?status=all">Все</a>
+        </div>
+
+        {% if submissions %}
+            <table class="table">
+                <thead>
+                    <tr><th>Студент</th><th>Задание</th><th>Курс</th><th>Статус</th><th>Баллы</th><th>Обновлено</th><th></th></tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                        <tr>
+                            <td>{{ submission.student }}</td>
+                            <td>{{ submission.assignment.title }}</td>
+                            <td>{{ submission.assignment.course.title }}</td>
+                            <td>
+                                {% if submission.status == 'graded' %}<span class="badge badge--finished">Проверено</span>
+                                {% else %}<span class="badge badge--registration">Ждёт</span>{% endif %}
+                            </td>
+                            <td>{% if submission.score is not None %}{{ submission.score }}/{{ submission.assignment.max_points }}{% else %}—{% endif %}</td>
+                            <td>{{ submission.updated_at|date:"d.m.y H:i" }}</td>
+                            <td><a class="btn btn--ghost btn--sm" href="{% url 'teacher:submission' submission.pk %}">Открыть</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="sec-lead">Здесь пока пусто.</p>
+        {% endif %}
+
+        {% include "includes/pagination.html" %}
+    </div>
+</section>
+{% endblock %}

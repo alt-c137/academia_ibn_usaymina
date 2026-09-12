@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Оценка ответов — Учительская{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <nav class="breadcrumbs">
+            <a href="{% url 'teacher:dashboard' %}">Учительская</a> /
+            <a href="{% url 'teacher:attempts' %}">Свободные ответы</a> /
+            <span>{{ attempt.student }}</span>
+        </nav>
+
+        <h1 class="sec-title sec-title--sm">{{ attempt.exam.title }}</h1>
+        <p class="sec-lead">
+            {{ attempt.student }} · {{ attempt.exam.course.title }} ·
+            сдан {{ attempt.finished_at|date:"d.m.Y H:i" }} ·
+            предварительный результат {{ attempt.score_percent }}%
+            (порог зачёта — {{ attempt.exam.pass_percent }}%)
+        </p>
+
+        {% if open_answers %}
+            <h2 class="office-block__t">Ждут оценки</h2>
+            {% for answer in open_answers %}
+                <div class="card answer-card">
+                    <p class="exam-q__text">{{ answer.question.text }}
+                        <span class="badge badge--registration">{{ answer.question.points }} балл(ов)</span></p>
+
+                    {% if answer.text %}
+                        <div class="rich-text">{{ answer.text|linebreaks }}</div>
+                    {% endif %}
+                    {% if answer.file %}
+                        {% if answer.file.name|lower|slice:"-4:" == ".jpg" or answer.file.name|lower|slice:"-5:" == ".jpeg" or answer.file.name|lower|slice:"-4:" == ".png" or answer.file.name|lower|slice:"-5:" == ".webp" or answer.file.name|lower|slice:"-4:" == ".gif" %}
+                            <a href="{{ answer.file.url }}" target="_blank" rel="noopener">
+                                <img class="submission-preview" src="{{ answer.file.url }}" alt="Ответ студента">
+                            </a>
+                        {% elif answer.file.name|lower|slice:"-4:" == ".mp3" or answer.file.name|lower|slice:"-4:" == ".m4a" or answer.file.name|lower|slice:"-4:" == ".ogg" or answer.file.name|lower|slice:"-4:" == ".wav" %}
+                            <audio controls src="{{ answer.file.url }}" preload="none">Аудио недоступно.</audio>
+                        {% endif %}
+                        <p><a class="btn btn--ghost btn--sm" href="{{ answer.file.url }}" target="_blank" rel="noopener">Открыть файл</a></p>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="answer" value="{{ answer.pk }}">
+                        <label class="label">Баллы (0–{{ answer.question.points }})</label>
+                        <input class="input" type="number" name="points" min="0"
+                               max="{{ answer.question.points }}" step="0.5" required
+                               {% if error_answer and error_answer.pk == answer.pk %}value="{{ error_answer_points|default:'' }}"{% endif %}>
+                        <label class="label">Комментарий (необязательно)</label>
+                        <textarea class="input" name="feedback" rows="3"></textarea>
+                        <button class="btn btn--primary btn--sm" type="submit">Оценить ответ</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="msg msg--success">Все ответы этой попытки проверены.</p>
+        {% endif %}
+
+        {% if auto_answers %}
+            <h2 class="office-block__t">Автопроверенные вопросы</h2>
+            <ol class="exam-review">
+                {% for answer in auto_answers %}
+                    <li class="exam-review__item {% if answer.question.q_type == 'open' %}is-correct{% elif answer.is_correct %}is-correct{% else %}is-wrong{% endif %}">
+                        <p class="exam-review__q">{{ answer.question.text }}</p>
+                        <p class="exam-review__mark">
+                            {% if answer.question.q_type == 'open' %}
+                                ✓ Оценено учителем (+{{ answer.points }})
+                                {% if answer.feedback %}· {{ answer.feedback }}{% endif %}
+                            {% elif answer.is_correct %}
+                                ✓ Верно (+{{ answer.points }})
+                            {% else %}
+                                ✗ Неверно (0)
+                            {% endif %}
+                        </p>
+                    </li>
+                {% endfor %}
+            </ol>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

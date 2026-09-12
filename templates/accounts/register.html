@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--form">
+        <p class="eyebrow">Первый шаг</p>
+        <h1 class="sec-title">Создать аккаунт</h1>
+        <p class="sec-lead">Регистрация бесплатная. После создания аккаунта можно записаться на любой открытый курс.</p>
+
+        <form class="card" method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+            {% endfor %}
+            {{ form.non_field_errors }}
+
+            <button class="btn btn--primary btn--block" type="submit">Зарегистрироваться</button>
+        </form>
+
+        <p class="form-links">Уже есть аккаунт? <a href="{% url 'accounts:login' %}">Войти</a></p>
+    </div>
+</section>
+{% endblock %}

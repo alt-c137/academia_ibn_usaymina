@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--form">
+        <p class="eyebrow">Настройки</p>
+        <h1 class="sec-title">Профиль</h1>
+
+        <form class="card" method="post">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+            {% endfor %}
+
+            <button class="btn btn--primary" type="submit">Сохранить</button>
+            <a class="btn btn--ghost" href="{% url 'accounts:password_change' %}">Сменить пароль</a>
+        </form>
+    </div>
+</section>
+{% endblock %}
