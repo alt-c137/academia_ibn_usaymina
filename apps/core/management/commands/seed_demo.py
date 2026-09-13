@@ -19,6 +19,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.assignments.models import Assignment
+from apps.books.models import Book
 from apps.core.models import SiteInfo
 from apps.courses.models import Course, Enrollment, Lesson, LessonProgress, Program
 from apps.exams.models import Attempt, Choice, Exam, Question
@@ -81,6 +82,11 @@ class Command(BaseCommand):
                 "about_footer": "Образовательная платформа: курсы по книгам, уроки, "
                                 "задания и экзамены с проверкой знаний.",
                 "submissions_via_messengers": True,  # демо: резервная сдача через мессенджеры
+                "show_books": True,                 # раздел книг включён
+                "payment_details": "8600 1234 5678 9012 — Академия (Uzcard)\n"
+                                   "Чек присылайте на WhatsApp поддержки.",
+                "show_donations": True,
+                "donations_details": "8600 1234 5678 9012 — поддержка проекта",
             },
         )
 
@@ -95,14 +101,15 @@ class Command(BaseCommand):
                 "(смените пароль!)"
             ))
 
-        # --- Программа и курсы --------------------------------------------------
+        # --- Факультеты (программы) и курсы ------------------------------------
         program, _ = Program.objects.update_or_create(
             slug="korallrovye-kholmy",
             defaults={
-                "name": "Коралловые холмы — положения о джиннах",
-                "summary": "«Акамуль-марджан фи ахкамиль-джан» Кады аш-Шибли",
-                "description": "Полный разбор книги о мирах джиннов: сотворение, виды, "
-                               "способности, взаимодействие с людьми и защита от них. "
+                "name": "Факультет акыды",
+                "summary": "Коралловые холмы — положения о джиннах",
+                "description": "Полный разбор книги «Акамуль-марджан фи ахкамиль-джан» "
+                               "Кады аш-Шибли: сотворение, виды, способности, "
+                               "взаимодействие с людьми и защита от них. "
                                "Каждая часть — отдельный курс с уроками, заданиями "
                                "и итоговым экзаменом.",
                 "order": 1,
@@ -143,6 +150,60 @@ class Command(BaseCommand):
         courses[5].end_date = date(2026, 11, 20)
         courses[5].save(update_fields=["registration_start", "registration_end",
                                         "start_date", "end_date"])
+
+        # --- Другие факультеты: арабский язык и фикх (курсы скоро) -------------
+        other_faculties = [
+            ("fakultet-arabskogo-yazyka", "Факультет арабского языка",
+             "От алфавита до свободного чтения книг",
+             "Основы арабского языка: алфавит, чтение, грамматика (нахв) и морфология "
+             "(сарф) — с опорой на классические учебные тексты.", 2,
+             [("Чтение и письмо: первый уровень", "«Мадина», том 1")]),
+            ("fakultet-fikha", "Факультет фикха",
+             "Практические положения шариата по мазхабу",
+             "Пошаговое изучение фикха: очищение, молитва, пост, закят и хадж — "
+             "по классическим трудам с разбором доказательств.", 3,
+             [("Очищение и молитва", "«Уmdat-ul-ahkam», раздел 1")]),
+        ]
+        for slug, name, summary, description, order, course_rows in other_faculties:
+            faculty, _ = Program.objects.update_or_create(
+                slug=slug,
+                defaults={"name": name, "summary": summary,
+                          "description": description, "order": order},
+            )
+            for c_order, (c_title, c_book) in enumerate(course_rows, start=1):
+                course, _ = Course.objects.update_or_create(
+                    slug=f"{slug}-kurs-{c_order}",
+                    defaults={
+                        "program": faculty,
+                        "title": c_title,
+                        "book": c_book,
+                        "author": "",
+                        "summary": f"{c_title}: курс факультета «{name}».",
+                        "status": Course.Status.ACTIVE if slug.startswith("fakultet-arabskogo")
+                                  else Course.Status.SOON,
+                        "is_free": slug.startswith("fakultet-arabskogo"),  # демо свободного курса
+                        "order": c_order,
+                    },
+                )
+                # Свободному курсу — пара уроков, чтобы можно было пройти
+                if course.is_free:
+                    Lesson.objects.update_or_create(
+                        course=course, order=1,
+                        defaults={
+                            "week": 1, "title": "Алфавит: 28 букв",
+                            "summary": "Первый урок свободного курса.",
+                            "content": "Разбор алфавита с примерами. Конспект открыт всем "
+                                       "зарегистрированным — свободный доступ.",
+                        },
+                    )
+                    Lesson.objects.update_or_create(
+                        course=course, order=2,
+                        defaults={
+                            "week": 1, "title": "Соединение букв и огласовки",
+                            "summary": "Учимся читать слоги.",
+                            "content": "Практика чтения слогов и первых слов.",
+                        },
+                    )
 
         # --- Уроки активного курса ---------------------------------------------
         lesson_titles = [
@@ -224,7 +285,9 @@ class Command(BaseCommand):
                     "title": title,
                     "description": description,
                     "max_points": 5,
-                    "due_at": timezone.make_aware(datetime(2026, 9, 20, 23, 59)) + timedelta(days=week),
+                    # Дедлайны — от текущего дня, чтобы демо всегда показывало
+                    # живые бейджи «осталось меньше суток / 2 дня / …».
+                    "due_at": timezone.now() + timedelta(days=week + 1, hours=3),
                 },
             )
 
@@ -256,6 +319,57 @@ class Command(BaseCommand):
                 )
                 if not item.file:
                     item.file.save(f"{title[:40]}.pdf", _demo_pdf(title), save=True)
+
+        # --- Книги: три полки — бесплатные, онлайн, продаются ------------------
+        demo_books = [
+            ("paid", "Коралловые холмы. О положениях, касающихся джиннов", "Кады аш-Шибли",
+             "Полный перевод книги с комментариями — та, по которой идёт факультет акыды.",
+             "65 000 сум", ""),
+            ("paid", "Сборник уроков по акиде", "преподаватели академии",
+             "Конспекты уроков факультета акыды в одном издании.", "45 000 сум", ""),
+            ("free", "Три основы (краткий вариант)", "",
+             "Классический трактат для начинающих — раздаем свободно.", "Бесплатно",
+             "https://example.com/tri-osnovy.pdf"),
+            ("online", "Сорок хадисов ан-Навави — текст с огласовками", "",
+             "Чтение прямо в браузере, с разметкой для заучивания.", "Онлайн",
+             "https://example.com/40-hadisov"),
+        ]
+        for order, (kind, title, author, description, price, read_url) in enumerate(demo_books, start=1):
+            Book.objects.update_or_create(
+                title=title,
+                defaults={
+                    "kind": kind,
+                    "author": author,
+                    "description": description,
+                    "price": price,
+                    "read_url": read_url,
+                    "order_pub": order,
+                    "is_published": True,
+                },
+            )
+
+        # --- Онлайн-встречи ------------------------------------------------------
+        if True:
+            from apps.meetings.models import Meeting
+
+            meeting_data = [
+                ("Вопросы и ответы по части 4", timezone.now() + timedelta(days=2),
+                 "Научная встреча: разбор сложных вопросов книги. Подключение по ссылке."),
+                ("Вводная встреча части 5", timezone.now() + timedelta(days=9),
+                 "Знакомство с планом курса «Джинны и люди: взаимодействие»."),
+                ("Итоги месяца", timezone.now() - timedelta(days=5),
+                 "Разбор типичных ошибок в заданиях, ответы на вопросы студентов."),
+            ]
+            for title, starts_at, description in meeting_data:
+                Meeting.objects.update_or_create(
+                    title=title, starts_at=starts_at,
+                    defaults={
+                        "course": active_course,
+                        "description": description,
+                        "duration_min": 60,
+                        "link": "https://meet.google.com/demo-link",
+                    },
+                )
 
         # --- Новости -------------------------------------------------------------------
         posts = [
@@ -326,5 +440,63 @@ class Command(BaseCommand):
         Attendance.objects.get_or_create(
             enrollment=enrollment, date=date(2026, 9, 8), defaults={"present": True}
         )
+
+        # --- Форум: разделы и демо-темы -----------------------------------------
+        from apps.forum.models import Board, Post as ForumPost, Thread
+
+        forum_boards = [
+            ("Статьи", "stati", "Разборы и переводы от преподавателей", 1),
+            ("Вопросы и ответы", "voprosy-i-otvety", "Спрашивайте — отвечаем по мере сил", 2),
+            ("Общий раздел", "obshchiy", "Знакомства, новости и всё остальное", 3),
+        ]
+        for name, slug, description, order in forum_boards:
+            Board.objects.update_or_create(
+                slug=slug, defaults={"name": name, "description": description, "order": order},
+            )
+
+        teacher_user = User.objects.filter(is_staff=True).first()
+        thread_main, _ = Thread.objects.update_or_create(
+            title="Правила форума: адаб и модерация",
+            defaults={
+                "board": Board.objects.get(slug="stati"),
+                "author": teacher_user,
+                "body": "Ассаляму алейкум ва рахматуллах.\n\n"
+                        "1. Пишем с адабом, без споров ради спора.\n"
+                        "2. Даём далили (доказательства) там, где говорим о шариате.\n"
+                        "3. Темы обычных пользователей публикуются после проверки.\n\n"
+                        "БаракаЛлаху фикум!",
+                "is_approved": True, "is_pinned": True,
+            },
+        )
+        Thread.objects.update_or_create(
+            title="Как совмещать учёбу с работой?",
+            defaults={
+                "board": Board.objects.get(slug="voprosy-i-otvety"),
+                "author": student,
+                "body": "Работаю до вечера. Как правильно распределить время на чтение "
+                        "недельной нормы книги и заданий?",
+                "is_approved": True,
+            },
+        )
+        ForumPost.objects.update_or_create(
+            thread=thread_main, author=teacher_user,
+            defaults={"body": "Добавлю: реклама и сторонние ссылки удаляются без обсуждения."},
+        )
+
+        # --- Оплата: демо-счёт с рассрочкой для студента ------------------------
+        from apps.payments.models import Invoice
+
+        invoice, created = Invoice.objects.get_or_create(
+            student=student, title="Оплата семестра (демо)",
+            defaults={
+                "kind": Invoice.Kind.TUITION,
+                "course": active_course,
+                "total": 1_000_000,
+                "note": "Рассрочка на 3 части. Реквизиты — в блоке выше.",
+                "is_active": True,
+            },
+        )
+        if created or not invoice.installments.exists():
+            invoice.create_schedule(3)
 
         self.stdout.write(self.style.SUCCESS("Готово! Откройте http://127.0.0.1:8000/"))

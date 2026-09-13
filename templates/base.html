@@ -34,6 +34,18 @@
                 <a class="nav__link {% if request.resolver_match.app_name == 'library' %}is-active{% endif %}"
                    href="{% url 'library:index' %}">Библиотека</a>
             {% endif %}
+            {% if has_books %}
+                <a class="nav__link {% if request.resolver_match.app_name == 'books' %}is-active{% endif %}"
+                   href="{% url 'books:index' %}">Книги</a>
+            {% endif %}
+            {% if has_meetings %}
+                <a class="nav__link {% if request.resolver_match.app_name == 'meetings' %}is-active{% endif %}"
+                   href="{% url 'meetings:list' %}">Встречи</a>
+            {% endif %}
+            {% if has_forum %}
+                <a class="nav__link {% if request.resolver_match.app_name == 'forum' %}is-active{% endif %}"
+                   href="{% url 'forum:home' %}">Форум</a>
+            {% endif %}
             {% if has_news %}
                 <a class="nav__link {% if request.resolver_match.url_name == 'list' %}is-active{% endif %}"
                    href="{% url 'news:list' %}">Новости</a>
@@ -55,8 +67,20 @@
                     <a class="btn btn--ghost btn--sm teacher-link" href="{% url 'teacher:dashboard' %}">
                         Учительская{% if teacher_pending %} <span class="badge badge--registration">{{ teacher_pending }}</span>{% endif %}
                     </a>
+                    {% if has_forum and forum_pending %}
+                        <a class="btn btn--ghost btn--sm teacher-link" href="{% url 'forum:moderation' %}">
+                            Модерация <span class="badge badge--registration">{{ forum_pending }}</span>
+                        </a>
+                    {% endif %}
                 {% endif %}
-                <a class="btn btn--ghost btn--sm" href="{% url 'grading:office' %}">Кабинет</a>
+                <a class="office-link btn btn--ghost btn--sm" href="{% url 'grading:office' %}" title="Кабинет">
+                    {% if user.avatar %}
+                        <img class="avatar avatar--xs" src="{{ user.avatar.url }}" alt="">
+                    {% else %}
+                        <span class="avatar avatar--xs avatar--empty" aria-hidden="true">{{ user.initials }}</span>
+                    {% endif %}
+                    <span class="office-link__label">Кабинет</span>
+                </a>
             {% else %}
                 <a class="btn btn--ghost btn--sm" href="{% url 'accounts:login' %}">Войти</a>
                 <a class="btn btn--primary btn--sm" href="{% url 'accounts:register' %}">Записаться</a>
@@ -88,6 +112,7 @@
         <nav class="footer__nav">
             <a href="{% url 'courses:list' %}">Курсы</a>
             {% if has_library %}<a href="{% url 'library:index' %}">Библиотека</a>{% endif %}
+            {% if has_books %}<a href="{% url 'books:index' %}">Книги</a>{% endif %}
             {% if has_news %}
                 <a href="{% url 'news:list' %}">Новости</a>
                 <a href="{% url 'news:faq' %}">Вопросы</a>
@@ -109,6 +134,15 @@
             {% endif %}
         </div>
     </div>
+    {% if site and site.show_donations and site.donations_details %}
+        <div class="wrap donate">
+            <div class="donate__text">
+                <p class="donate__t">{{ site.donations_title|default:"Поддержать проект" }}</p>
+                <p class="donate__d">{{ site.donations_text }}</p>
+            </div>
+            <div class="donate__details">{{ site.donations_details|linebreaksbr }}</div>
+        </div>
+    {% endif %}
     <div class="wrap footer__bottom">
         <span>© {% now "Y" %} {% firstof site.site_name site_title "Академия" %}. Все права защищены.</span>
         {% if user.is_staff %}<a href="/admin/">Администрирование</a>{% endif %}

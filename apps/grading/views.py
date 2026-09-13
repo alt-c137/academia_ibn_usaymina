@@ -31,6 +31,22 @@ class OfficeView(LoginRequiredMixin, TemplateView):
         context["enrollments"] = enrollments
         context["grades"] = {e.pk: compute_course_grade(e) for e in enrollments}
 
+        # Группировка по факультетам (программам): «Факультет акыды — 42%».
+        # Прогресс программы = средний прогресс её курсов у студента.
+        by_program: dict[int, dict] = {}
+        for e in enrollments:
+            program = e.course.program
+            row = by_program.setdefault(program.pk, {"program": program, "items": []})
+            row["items"].append(e)
+        program_rows = []
+        for row in by_program.values():
+            row["percent"] = round(
+                sum(e.percent for e in row["items"]) / len(row["items"])
+            )
+            program_rows.append(row)
+        program_rows.sort(key=lambda r: (r["program"].order, r["program"].pk))
+        context["program_rows"] = program_rows
+
         if apps.is_installed("apps.assignments"):
             from apps.assignments.models import Assignment, Submission
 
@@ -59,6 +75,26 @@ class OfficeView(LoginRequiredMixin, TemplateView):
         context["has_transcripts"] = user.enrollments.filter(
             transcript__isnull=False
         ).exists()
+
+        # Ближайшая онлайн-встреча (если модуль meetings включён)
+        if apps.is_installed("apps.meetings"):
+            from apps.meetings.models import Meeting
+
+            context["next_meeting"] = (
+                Meeting.objects.filter(is_published=True, starts_at__gte=timezone.now())
+                .select_related("course")
+                .order_by("starts_at")
+                .first()
+            )
+
+        # Счётчик неоплаченных частей — бейдж на кнопке «Платежи»
+        if apps.is_installed("apps.payments"):
+            from apps.payments.models import Installment, Invoice
+
+            context["my_unpaid"] = Installment.objects.filter(
+                invoice__student=user, invoice__is_active=True, is_paid=False
+            ).count()
+
         return context
 
 
@@ -68,9 +104,11 @@ class TranscriptView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Выписка — формальный документ: только зачисленные курсы,
+        # свободных слушателей в неё не включаем.
         enrollments = list(
             Enrollment.objects.filter(student=self.request.user)
-            .exclude(status=Enrollment.Status.DROPPED)
+            .exclude(status__in=[Enrollment.Status.DROPPED, Enrollment.Status.LISTENER])
             .select_related("course", "course__program")
         )
         context["rows"] = [

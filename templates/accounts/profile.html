@@ -5,14 +5,69 @@
 {% block content %}
 <section class="section">
     <div class="wrap wrap--form">
-        <p class="eyebrow">Настройки</p>
-        <h1 class="sec-title">Профиль</h1>
+        <p class="eyebrow">Профиль</p>
+        <h1 class="sec-title">{{ user.first_name }} {{ user.last_name }}
+            {% if user.is_student %}
+                <span class="badge badge--active">Студент</span>
+            {% elif user.enrollments.exists %}
+                <span class="badge badge--soon">Свободный слушатель</span>
+            {% else %}
+                <span class="badge badge--registration">Пользователь (не на основе)</span>
+            {% endif %}
+        </h1>
 
-        <form class="card" method="post">
+        {# ─── Сводка обучения ─── #}
+        <div class="profile-summary card">
+            <div class="profile-summary__ava">
+                {% if user.avatar %}
+                    <img class="avatar avatar--lg" src="{{ user.avatar.url }}" alt="">
+                {% else %}
+                    <span class="avatar avatar--lg avatar--empty">{{ user.initials }}</span>
+                {% endif %}
+            </div>
+            <div class="profile-summary__body">
+                {% if enrollments %}
+                    <p class="profile-summary__row">
+                        Программа:
+                        <strong>{% for e in enrollments %}{{ e.course.program.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</strong>
+                    </p>
+                    <p class="profile-summary__row">Обучения пройдено: <strong>{{ overall_percent }}%</strong></p>
+                    <div class="progress-bar">
+                        <div class="progress-bar__fill" style="width: {{ overall_percent }}%"></div>
+                    </div>
+                    {% if next_due %}
+                        <p class="profile-summary__row">
+                            Ближайший дедлайн:
+                            <strong>{{ next_due.title }}</strong> — до {{ next_due.due_at|date:"d.m.Y H:i" }}
+                        </p>
+                    {% endif %}
+                {% elif user.enrollments.exists %}
+                    <p class="profile-summary__row">
+                        Вы учитесь <strong>свободно</strong> (не на основе): доступны бесплатные
+                        курсы, уроки и тесты. Зачисление на основную программу открывается
+                        в окно регистрации курса.
+                    </p>
+                {% else %}
+                    <p class="profile-summary__row">
+                        Вы ещё не записаны на курсы —
+                        <a href="{% url 'courses:list' %}">выбрать факультет</a>
+                        или учиться свободно.
+                    </p>
+                {% endif %}
+                <a class="btn btn--ghost btn--sm" href="{% url 'grading:office' %}">Весь прогресс — в кабинете</a>
+            </div>
+        </div>
+
+        {# ─── Настройки ─── #}
+        <form class="card" method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            <p class="form-hint">Аватар — квадратная картинка до 2 МБ (jpg, png, webp).</p>
 
             {% for field in form %}
                 <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.name == "avatar" and user.avatar %}
+                    <img class="avatar avatar--md" src="{{ user.avatar.url }}" alt="Текущий аватар">
+                {% endif %}
                 {{ field }}
                 {{ field.errors }}
             {% endfor %}

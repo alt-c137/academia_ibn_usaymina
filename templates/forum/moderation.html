@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Модерация форума — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow">Форум</p>
+        <h1 class="sec-title">Модерация</h1>
+        <p class="sec-lead">Темы, ожидающие публикации. Одобрите или удалите.</p>
+
+        <div class="forum-threads">
+            {% for thread in pending %}
+                <div class="forum-thread is-pending">
+                    <div class="forum-thread__main">
+                        <a class="forum-thread__t" href="{{ thread.get_absolute_url }}">{{ thread.title }}</a>
+                        <span class="forum-thread__meta">
+                            {{ thread.board.name }} · {{ thread.author|default:"удалённый автор" }} · {{ thread.created_at|date:"d.m.Y H:i" }}
+                        </span>
+                        <p class="forum-thread__excerpt">{{ thread.body|truncatewords:30 }}</p>
+                    </div>
+                    <div class="forum-thread__actions">
+                        <form method="post" action="{% url 'forum:thread_moderate' thread.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn--primary btn--sm" name="action" value="approve" type="submit">Одобрить</button>
+                            <button class="btn btn--ghost btn--sm" name="action" value="delete" type="submit">Удалить</button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="sec-lead">Очередь пуста — всё проверено, альхамдулиЛлях.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

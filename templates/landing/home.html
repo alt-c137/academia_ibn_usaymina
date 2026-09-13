@@ -194,6 +194,36 @@
     </div>
 </section>
 
+{# ─────────────────── Книги ─────────────────── #}
+{% if has_books %}
+<section class="section" id="books">
+    <div class="wrap">
+        <p class="eyebrow reveal">Издания</p>
+        <h2 class="sec-title reveal">Книги платформы</h2>
+        <p class="sec-lead reveal">Печатные издания, по которым учит академия, — можно заказать доставкой.</p>
+        <div class="book-grid book-grid--home">
+            {% for book in home_books %}
+                <a class="book-card reveal" href="{% url 'books:index' %}">
+                    <div class="book-card__cover">
+                        {% if book.cover %}
+                            <img src="{{ book.cover.url }}" alt="Обложка: {{ book.title }}" loading="lazy">
+                        {% else %}
+                            <span class="book-card__placeholder" aria-hidden="true">✦</span>
+                        {% endif %}
+                    </div>
+                    <div class="book-card__body">
+                        <h3 class="book-card__t">{{ book.title }}</h3>
+                        {% if book.price %}<p class="book-card__price">{{ book.price }}</p>{% endif %}
+                        <span class="book-card__more">Подробнее →</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+        <p class="center"><a class="btn btn--ghost" href="{% url 'books:index' %}">Все книги</a></p>
+    </div>
+</section>
+{% endif %}
+
 {# ─────────────────── Новости ─────────────────── #}
 {% if latest_posts %}
 <section class="section" id="news">

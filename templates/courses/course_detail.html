@@ -15,6 +15,9 @@
         <div class="course-head">
             <div class="course-head__main">
                 <span class="badge badge--{{ course.status }}">{{ course.get_status_display }}</span>
+                {% if course.is_free %}
+                    <span class="badge badge--registration">Свободный доступ — без зачисления</span>
+                {% endif %}
                 <h1 class="sec-title">{{ course.title }}</h1>
                 {% if course.book %}
                     <p class="course-head__book">{{ course.book }}{% if course.author %} — {{ course.author }}{% endif %}</p>
@@ -24,6 +27,11 @@
                 <div class="course-head__actions">
                     {% if enrollment %}
                         <a class="btn btn--primary" href="#lessons">Продолжить обучение</a>
+                        {% if enrollment.status == 'listener' %}
+                            <span class="badge badge--soon">Вы проходите свободно (не на основе)</span>
+                        {% endif %}
+                    {% elif course.is_free %}
+                        <a class="btn btn--primary" href="{% url 'courses:enroll' course.slug %}">Учиться свободно</a>
                     {% elif course.registration_open %}
                         <a class="btn btn--primary" href="{% url 'courses:enroll' course.slug %}">Записаться на курс</a>
                     {% else %}

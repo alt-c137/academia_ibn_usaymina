@@ -37,6 +37,38 @@ class Assignment(TimeStampedModel):
     def __str__(self):
         return f"{self.course} — неделя {self.week}: {self.title}"
 
+    # --- Дедлайн: статус и человеческая подпись ------------------------------
+    @property
+    def due_status(self) -> str | None:
+        """Срочность дедлайна: ok / soon / today / over (None — срока нет)."""
+        if not self.due_at:
+            return None
+        from django.utils import timezone
+
+        left = self.due_at - timezone.now()
+        if left.total_seconds() <= 0:
+            return "over"
+        if left.days >= 3:
+            return "ok"
+        if left.days >= 1:
+            return "soon"
+        return "today"
+
+    @property
+    def due_in(self) -> str:
+        """«осталось 5 дней», «осталось меньше суток», «срок истёк»."""
+        status = self.due_status
+        if status is None:
+            return ""
+        if status == "over":
+            return "срок истёк"
+        from django.utils import timezone
+
+        days = (self.due_at - timezone.now()).days
+        if days >= 1:
+            return f"осталось {days} дн."
+        return "осталось меньше суток"
+
 
 class Submission(TimeStampedModel):
     class Status(models.TextChoices):

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ thread.title }} — Форум — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <nav class="breadcrumbs">
+            <a href="{% url 'forum:home' %}">Форум</a> /
+            <a href="{{ thread.board.get_absolute_url }}">{{ thread.board.name }}</a> /
+            <span>{{ thread.title|truncatechars:40 }}</span>
+        </nav>
+
+        {% if not thread.is_approved %}
+            <p class="msg msg--warning">
+                Тема на модерации: видна только вам и модераторам.
+            </p>
+        {% endif %}
+
+        <article class="forum-post is-op">
+            <div class="forum-post__side">
+                {% if thread.author and thread.author.avatar %}
+                    <img class="avatar avatar--md" src="{{ thread.author.avatar.url }}" alt="">
+                {% else %}
+                    <span class="avatar avatar--md avatar--empty">{{ thread.author.initials|default:"?" }}</span>
+                {% endif %}
+                <span class="forum-post__author">{{ thread.author|default:"удалённый автор" }}</span>
+                {% if author_is_moderator %}
+                    <span class="badge badge--finished">преподаватель</span>
+                {% elif author_is_student %}
+                    <span class="badge badge--active">студент</span>
+                {% endif %}
+            </div>
+            <div class="forum-post__body">
+                <h1 class="forum-post__title">{{ thread.title }}</h1>
+                <div class="rich-text">{{ thread.body|linebreaks }}</div>
+                <div class="forum-post__time">{{ thread.created_at|date:"d.m.Y H:i" }} · {{ thread.views }} просмотров</div>
+            </div>
+        </article>
+
+        <h2 class="office-block__t">Ответы ({{ posts|length }})</h2>
+        <div class="forum-posts">
+            {% for post in posts %}
+                <article class="forum-post" id="post-{{ post.pk }}">
+                    <div class="forum-post__side">
+                        {% if post.author and post.author.avatar %}
+                            <img class="avatar avatar--md" src="{{ post.author.avatar.url }}" alt="">
+                        {% else %}
+                            <span class="avatar avatar--md avatar--empty">{{ post.author.initials|default:"?" }}</span>
+                        {% endif %}
+                        <span class="forum-post__author">{{ post.author|default:"удалённый автор" }}</span>
+                    </div>
+                    <div class="forum-post__body">
+                        <div class="rich-text">{{ post.body|linebreaks }}</div>
+                        <div class="forum-post__time">{{ post.created_at|date:"d.m.Y H:i" }}</div>
+                    </div>
+                </article>
+            {% empty %}
+                <p class="sec-lead">Ответов пока нет.</p>
+            {% endfor %}
+        </div>
+
+        {% if can_reply %}
+            <form class="card" method="post">
+                {% csrf_token %}
+                <label class="label" for="{{ form.body.id_for_label }}">Ваш ответ</label>
+                {{ form.body }} {{ form.body.errors }}
+                <button class="btn btn--primary" type="submit">Отправить ответ</button>
+            </form>
+        {% elif thread.is_closed %}
+            <p class="msg msg--info">Тема закрыта модератором.</p>
+        {% elif user.is_authenticated and user.is_banned %}
+            <p class="msg msg--warning">Вы заблокированы до {{ user.banned_until|date:"d.m.Y" }} — публикация недоступна.</p>
+        {% elif not user.is_authenticated %}
+            <p class="msg msg--info"><a href="{% url 'accounts:login' %}">Войдите</a>, чтобы отвечать.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

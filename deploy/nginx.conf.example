@@ -1,0 +1,57 @@
+# ============================================================
+# Nginx для «Академии Ибн Усаймина» — пример продакшен-конфига.
+#
+# Копируй на сервер:  sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/academy
+#                     sudo ln -s /etc/nginx/sites-available/academy /etc/nginx/sites-enabled/
+#   замени academy.example.com на свой домен и пути /opt/academy на свои,
+#   затем: sudo nginx -t && sudo systemctl reload nginx
+#
+# Схема: браузер → Nginx (TLS, статику и медиа отдаёт сам) → Gunicorn 127.0.0.1:8000
+# Сертификат: sudo certbot --nginx -d academy.example.com
+# ============================================================
+
+server {
+    listen 80;
+    server_name academy.example.com;
+    # certbot допишет redirect на https и блок 443 сам; пока проксируем:
+    include /etc/nginx/proxy_params;
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name academy.example.com;
+
+    # --- Сертификаты Let's Encrypt (создаёт certbot) ---
+    ssl_certificate     /etc/letsencrypt/live/academy.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/academy.example.com/privkey.pem;
+
+    # Загрузка ответов студентов до 100 МБ (как FileValidator в проекте)
+    client_max_body_size 105M;
+
+    # Медиа: аудио/видео/PDF уроков и ответы студентов.
+    # Никакого листинга папок и исполнения скриптов тут быть не может:
+    # Nginx отдаёт файлы как есть, только на чтение.
+    location /media/ {
+        alias /opt/academy/media/;
+        autoindex off;
+        expires 7d;
+        add_header X-Content-Type-Options nosniff always;
+        add_header Content-Disposition "";   # пустой: не форсировать скачивание
+        try_files $uri =404;
+    }
+
+    # Статику (css/js/шрифты с хэшами в именах) отдаёт WhiteNoise,
+    # поэтому в Nginx её не дублируем — проксируем вместе с сайтом.
+    location / {
+        include /etc/nginx/proxy_params;
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript image/svg+xml;
+    gzip_min_length 1024;
+}

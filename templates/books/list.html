@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Наши книги — {{ site_title }}{% endblock %}
+{% block description %}Книги платформы: бесплатные, онлайн-чтение и печатные издания на заказ.{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap">
+        <p class="eyebrow reveal">Издания</p>
+        <h1 class="sec-title reveal">Наши книги</h1>
+        <p class="sec-lead reveal">
+            Три полки: можно скачать бесплатно, читать онлайн или заказать
+            печатное издание.
+        </p>
+
+        {% for shelf in shelves %}
+            {% if shelf.items %}
+                <div class="book-shelf" id="{{ shelf.key }}">
+                    <div class="book-shelf__head">
+                        <h2 class="book-shelf__t">{{ shelf.title }}</h2>
+                        <p class="book-shelf__note">{{ shelf.note }}</p>
+                    </div>
+                    <div class="book-grid">
+                        {% for book in shelf.items %}
+                            <div class="book-card reveal">
+                                <div class="book-card__cover">
+                                    {% if book.cover %}
+                                        <img src="{{ book.cover.url }}" alt="Обложка: {{ book.title }}" loading="lazy">
+                                    {% else %}
+                                        <span class="book-card__placeholder" aria-hidden="true">✦</span>
+                                    {% endif %}
+                                </div>
+                                <div class="book-card__body">
+                                    <h3 class="book-card__t">{{ book.title }}</h3>
+                                    {% if book.author %}<p class="book-card__author">{{ book.author }}</p>{% endif %}
+                                    <p class="book-card__d">{{ book.description|truncatewords:20 }}</p>
+                                    {% if book.kind == 'paid' and book.price %}
+                                        <p class="book-card__price">{{ book.price }}</p>
+                                    {% elif book.kind == 'free' %}
+                                        <p class="book-card__price book-card__price--free">Бесплатно</p>
+                                    {% elif book.kind == 'online' %}
+                                        <p class="book-card__price book-card__price--free">Онлайн</p>
+                                    {% endif %}
+
+                                    {% if book.kind == 'paid' %}
+                                        {% if book.order_url %}
+                                            <a class="btn btn--primary btn--sm" href="{{ book.order_url }}" target="_blank" rel="noopener">
+                                                {{ book.order_note|default:"Заказать" }}
+                                            </a>
+                                        {% elif site and site.whatsapp %}
+                                            <a class="btn btn--primary btn--sm" target="_blank" rel="noopener"
+                                               href="https://wa.me/{{ site.whatsapp }}?text={{ book.title|urlencode }} — хочу заказать книгу">
+                                                {{ book.order_note|default:"Заказать" }}
+                                            </a>
+                                        {% endif %}
+                                    {% elif book.read_url %}
+                                        <a class="btn btn--ghost btn--sm" href="{{ book.read_url }}" target="_blank" rel="noopener">
+                                            {% if book.kind == 'online' %}Читать онлайн{% else %}Скачать{% endif %}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% empty %}
+            <p class="sec-lead">Раздел готовится — книги появятся скоро.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

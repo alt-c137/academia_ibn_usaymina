@@ -11,6 +11,7 @@
 
         {% for program in programs %}
             <div class="program reveal">
+                <p class="program__label">Факультет</p>
                 <h2 class="program__name">{{ program.name }}</h2>
                 {% if program.summary %}<p class="program__summary">{{ program.summary }}</p>{% endif %}
 

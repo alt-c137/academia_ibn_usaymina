@@ -1,0 +1,55 @@
+/* ============================================================
+   ТЕМА «МИНИМАЛ» (sand) — альтернативная
+   Бежевая, бронза, крупные рубленые заголовки, тонкие линии,
+   арабская звезда в hero, светлый подвал.
+
+   Включается атрибутом <html data-theme="sand">.
+   Сделать её основной для всех: .env → SITE_THEME_DEFAULT=sand
+   (или поменять в tokens.css, какие файлы тем подключать).
+   ============================================================ */
+:root[data-theme="sand"] {
+    --bg: #F2ECDF;            /* бежевая основа */
+    --bg-alt: #ECE4D2;
+    --surface: #FBF8F0;
+    --surface-2: #F6F1E4;
+    --ink: #37301F;
+    --ink-soft: #6E6046;
+
+    --accent: #7D5A22;        /* тёмная бронза */
+    --accent-strong: #5F431A;
+    --accent-soft: #E9DDC2;
+    --on-accent: #FDFBF5;
+    --gold: #7D5A22;
+    --gold-bright: #A0803F;
+    --gold-soft: #E9DDC2;
+    --line: #DCD2B9;
+    --danger: #9C3D24;
+    --danger-soft: #F2DFD2;
+    --success: #4E6B33;
+    --success-soft: #E7EBD9;
+    --warning: #8A6116;
+    --warning-soft: #F3E9D0;
+
+    --shadow: none;           /* минимализм: без теней, тонкие рамки */
+    --shadow-sm: none;
+    --radius: 2px;
+    --radius-sm: 2px;
+    --border: 1px solid var(--line);
+    --ornament-display: block; /* арабская звезда включена */
+
+    /* Полоса в минимале — светлая, спокойная */
+    --band-1: #ECE4D2;
+    --band-2: #E2D8C0;
+    --band-ink: #37301F;
+    --band-soft: #6E6046;
+    --band-line: rgba(55, 48, 31, 0.25);
+
+    /* Подвал — тоже светлый, с тонкой линией */
+    --footer-bg: #ECE4D2;
+    --footer-ink: #6E6046;
+    --footer-strong: #37301F;
+
+    --title-weight: 800;
+    --title-tracking: -0.028em;
+    --font-title: var(--font-ui); /* рубленый шрифт заголовков */
+}

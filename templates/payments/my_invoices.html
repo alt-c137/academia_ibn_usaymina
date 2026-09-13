@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Мои платежи — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow">Оплата</p>
+        <h1 class="sec-title">Мои платежи</h1>
+
+        {% if site and site.payment_details %}
+            <div class="messenger-fallback">
+                <p class="messenger-fallback__note"><strong>Реквизиты для оплаты:</strong></p>
+                <div class="rich-text">{{ site.payment_details|linebreaks }}</div>
+            </div>
+        {% endif %}
+
+        {% if invoices %}
+            {% for invoice in invoices %}
+                <div class="pay-card">
+                    <div class="pay-card__head">
+                        <div>
+                            <span class="badge badge--registration">{{ invoice.get_kind_display }}</span>
+                            <h2 class="pay-card__t">{{ invoice.title }}</h2>
+                            {% if invoice.course %}<p class="pay-card__course">Курс: {{ invoice.course.title }}</p>{% endif %}
+                            {% if invoice.note %}<p class="pay-card__note">{{ invoice.note }}</p>{% endif %}
+                        </div>
+                        <div class="pay-card__stat">
+                            <span class="pay-card__percent">{{ invoice.percent }}%</span>
+                            <span class="pay-card__caption">
+                                оплачено {{ invoice.paid_total }} из {{ invoice.total }} сум
+                            </span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar__fill" style="width: {{ invoice.percent }}%"></div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr><th>№</th><th>Сумма</th><th>Оплатить до</th><th>Статус</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for part in invoice.installments.all %}
+                                <tr>
+                                    <td>{{ part.number }}</td>
+                                    <td>{{ part.amount }} сум</td>
+                                    <td>{% if part.due_at %}{{ part.due_at|date:"d.m.Y" }}{% else %}—{% endif %}</td>
+                                    <td>
+                                        {% if part.is_paid %}
+                                            <span class="badge badge--finished">Оплачено {{ part.paid_at|date:"d.m.Y" }}</span>
+                                        {% elif part.due_at and part.due_at < now %}
+                                            <span class="badge badge--active" style="background:var(--danger-soft);color:var(--danger)">Просрочено</span>
+                                        {% else %}
+                                            <span class="badge badge--soon">Ожидает</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="sec-lead">Счетов нет — обучение бесплатное, платных программ пока не выставлено.</p>
+        {% endif %}
+
+        <p><a class="btn btn--ghost btn--sm" href="{% url 'grading:office' %}">← В кабинет</a></p>
+    </div>
+</section>
+{% endblock %}

@@ -22,7 +22,8 @@ def ensure_teacher_group(sender, **kwargs):
     """
     from django.contrib.auth.models import Group, Permission
 
-    CONTENT_APPS = ("courses", "exams", "assignments", "grading", "library", "news")
+    CONTENT_APPS = ("courses", "exams", "assignments", "grading", "library",
+                    "news", "books", "payments", "forum")
     group, _ = Group.objects.get_or_create(name="Учитель")
 
     perms = Permission.objects.filter(content_type__app_label__in=CONTENT_APPS).exclude(

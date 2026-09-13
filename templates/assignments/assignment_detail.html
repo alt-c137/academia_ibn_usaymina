@@ -22,6 +22,15 @@
             {% endif %}
         </ul>
 
+        {% if assignment.due_at and not overdue %}
+            <p class="due due--box due--{{ assignment.due_status }}">
+                {% if assignment.due_status == 'today' %}⏳ Осталось меньше суток — поторопитесь!
+                {% elif assignment.due_status == 'soon' %}⏳ Дедлайн близко: {{ assignment.due_in }}
+                {% else %}📅 На выполнение {{ assignment.due_in }}
+                {% endif %}
+            </p>
+        {% endif %}
+
         {% if overdue %}
             <p class="msg msg--warning">Срок сдачи истёк — отправка закрыта.</p>
         {% else %}

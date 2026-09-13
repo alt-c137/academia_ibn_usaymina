@@ -16,7 +16,7 @@ class StaticViewSitemap(Sitemap):
     changefreq = "weekly"
 
     def items(self):
-        return ["core:home", "courses:list", "news:faq", "core:contact"]
+        return ["core:home", "courses:list", "news:faq", "core:contact", "books:index", "forum:home"]
 
     def location(self, item):
         from django.urls import reverse

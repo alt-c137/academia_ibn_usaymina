@@ -40,6 +40,29 @@ class SiteInfo(models.Model):
         default="Если сайт недоступен — отправьте решение учителю в мессенджер, приложив файл:",
     )
 
+    # Раздел продажи книг (модуль apps.books). Появляется в меню и на
+    # главной только когда включён здесь — решает учитель/админ.
+    show_books = models.BooleanField(
+        "Показывать раздел книг в меню и на главной", default=True,
+    )
+
+    # Оплата обучения: реквизиты видит студент в «Мои платежи» (модуль payments).
+    payment_details = models.TextField(
+        "Реквизиты для оплаты", blank=True,
+        help_text="Номер карты/счёта, имя получателя, куда присылать чек. "
+                  "Видит только сам студент на странице платежей",
+    )
+
+    # Поддержка проекта: блок в подвале сайта (помощь редакторам и т.п.)
+    show_donations = models.BooleanField("Показывать блок «Поддержать проект» в подвале", default=False)
+    donations_title = models.CharField("Заголовок блока поддержки", max_length=120,
+                                       blank=True, default="Поддержать проект")
+    donations_text = models.CharField("Текст о поддержке", max_length=300, blank=True,
+                                      default="Проект существует на пожертвования. Помощь редакторам, "
+                                              "переводам книг и развитию платформы — баракаЛлаху фикум.")
+    donations_details = models.TextField("Реквизиты поддержки", blank=True,
+                                         help_text="Карта, счёт или ссылка — по строкам")
+
     class Meta:
         verbose_name = "Контакты сайта"
         verbose_name_plural = "Контакты сайта"

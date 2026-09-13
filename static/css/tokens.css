@@ -1,13 +1,26 @@
 /* ============================================================
    ТОКЕНЫ ДИЗАЙНА — «Академия Ибн Усаймина»
-   Одна разметка, две темы. Тема = набор CSS-переменных,
-   переключается атрибутом <html data-theme="paper|sand">.
-   paper — «классика»: светлая бумажная, серифные заголовки
-   sand  — «минимал»: бежевая, крупные рубленые заголовки,
-           арабский орнамент в фоне
+
+   Темы лежат ОТДЕЛЬНЫМИ файлами в папке themes/:
+     themes/paper.css — «Классика» (основная): изумруд + золото
+     themes/sand.css  — «Минимал»: бежевый минимализм
+
+   Поменять тему, которую видят все по умолчанию:
+     способ 1 (без кода): .env → SITE_THEME_DEFAULT=sand
+     способ 2 (файлом): поменяй местами/переименуй файлы в themes/
+   Показать учителю обе: кнопка «Классика / Минимал» в шапке сайта.
    ============================================================ */
+@import url("themes/paper.css");
+@import url("themes/sand.css");
 
 /* --- Шрифты (лежат локально в static/fonts, без интернета) --- */
+@font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url("../fonts/inter-300.woff2") format("woff2");
+}
 @font-face {
     font-family: "Inter";
     font-style: normal;
@@ -37,6 +50,13 @@
     src: url("../fonts/inter-700.woff2") format("woff2");
 }
 @font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("../fonts/inter-800.woff2") format("woff2");
+}
+@font-face {
     font-family: "Source Serif 4";
     font-style: normal;
     font-weight: 400;
@@ -50,6 +70,13 @@
     font-display: swap;
     src: url("../fonts/serif-600.woff2") format("woff2");
 }
+@font-face {
+    font-family: "Source Serif 4";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/serif-700.woff2") format("woff2");
+}
 
 /* --- Общие величины (не зависят от темы) --- */
 :root {
@@ -58,68 +85,4 @@
     --font-ui: "Inter", "Segoe UI", system-ui, sans-serif;
     --font-title: var(--font-ui);
     --tr: 0.25s ease;
-}
-
-/* ============================ ТЕМА: КЛАССИКА (paper) ============================ */
-:root[data-theme="paper"],
-:root:not([data-theme="sand"]) {
-    --bg: #F6F2EA;            /* основной фон — «бумага» */
-    --bg-alt: #EFE9DC;        /* секции-компаньоны */
-    --surface: #FFFFFF;       /* карточки */
-    --surface-2: #FCFAF5;     /* вложенные поверхности */
-    --ink: #2A251C;           /* основной текст */
-    --ink-soft: #6E6553;      /* второстепенный текст */
-    --accent: #2F6B52;        /* глубокий зелёный */
-    --accent-strong: #24523F;
-    --accent-soft: #E4EEE8;   /* подложка акцента */
-    --on-accent: #FFFFFF;
-    --gold: #A97E22;          /* золото статусов и орнаментов */
-    --gold-soft: #F3E8CF;
-    --line: #E3DBC9;          /* линии и рамки */
-    --danger: #A8402F;
-    --danger-soft: #F7E4E0;
-    --success: #2F6B52;
-    --success-soft: #E4EEE8;
-    --warning: #8A6116;
-    --warning-soft: #F6EDD6;
-
-    --shadow: 0 12px 32px rgba(74, 62, 38, 0.10);
-    --shadow-sm: 0 4px 14px rgba(74, 62, 38, 0.07);
-    --radius: 16px;
-    --radius-sm: 10px;
-    --border: 1px solid var(--line);
-    --ornament-display: none; /* в классике орнамент не показываем */
-    --title-weight: 600;
-}
-
-/* ============================ ТЕМА: МИНИМАЛ (sand) ============================ */
-:root[data-theme="sand"] {
-    --bg: #F2ECDF;            /* бежевая основа */
-    --bg-alt: #ECE4D2;
-    --surface: #FBF8F0;
-    --surface-2: #F6F1E4;
-    --ink: #37301F;
-    --ink-soft: #8A7C5E;
-    --accent: #7D5A22;        /* тёмная бронза */
-    --accent-strong: #5F431A;
-    --accent-soft: #E9DDC2;
-    --on-accent: #FDFBF5;
-    --gold: #7D5A22;
-    --gold-soft: #E9DDC2;
-    --line: #DCD2B9;
-    --danger: #9C3D24;
-    --danger-soft: #F2DFD2;
-    --success: #4E6B33;
-    --success-soft: #E7EBD9;
-    --warning: #8A6116;
-    --warning-soft: #F3E9D0;
-
-    --shadow: none;           /* минимализм: без теней, тонкие рамки */
-    --shadow-sm: none;
-    --radius: 2px;
-    --radius-sm: 2px;
-    --border: 1px solid var(--line);
-    --ornament-display: block; /* арабский орнамент включён */
-    --title-weight: 650;
-    --font-title: var(--font-ui); /* и рубленый шрифт заголовков */
 }

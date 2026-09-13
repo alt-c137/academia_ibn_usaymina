@@ -103,12 +103,32 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
 
 
 def enroll_view(request, slug: str):
-    """Запись на курс (кнопка «Записаться» на странице курса)."""
+    """Запись на курс (кнопка «Записаться» на странице курса).
+
+    Свободный курс (is_free) записывает как «слушателя» без проверки окна
+    регистрации — это отдельный вход для тех, кто хочет учиться вне основы.
+    """
     if not request.user.is_authenticated:
         messages.info(request, "Сначала войдите или зарегистрируйтесь.")
         return redirect("accounts:login")
 
     course = get_object_or_404(Course, slug=slug, is_published=True)
+
+    if course.is_free:
+        _, created = Enrollment.objects.get_or_create(
+            student=request.user, course=course,
+            defaults={"status": Enrollment.Status.LISTENER},
+        )
+        if created:
+            messages.success(
+                request,
+                "Вы учитесь свободно — уроки и тести курса открыты. "
+                "ХалякяЛлаху тааля барака фихи!",
+            )
+        else:
+            messages.info(request, "Вы уже проходите этот курс.")
+        return redirect("courses:detail", slug=course.slug)
+
     if not course.registration_open:
         messages.error(request, "Регистрация на этот курс сейчас закрыта.")
         return redirect("courses:detail", slug=course.slug)

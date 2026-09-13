@@ -7,12 +7,30 @@
 <section class="section">
     <div class="wrap">
         <div class="office-head">
-            <div>
-                <p class="eyebrow">Кабинет</p>
-                <h1 class="sec-title">Мерхаба, {{ user.first_name|default:user.email }}!</h1>
+            <div class="office-head__who">
+                {% if user.avatar %}
+                    <img class="avatar avatar--lg" src="{{ user.avatar.url }}" alt="">
+                {% else %}
+                    <span class="avatar avatar--lg avatar--empty" aria-hidden="true">{{ user.initials }}</span>
+                {% endif %}
+                <div>
+                    <p class="eyebrow">Кабинет</p>
+                    <h1 class="sec-title">Мерхаба, {{ user.first_name|default:user.email }}!
+                        {% if user.is_student %}
+                            <span class="badge badge--active" title="Зачислен на основную программу">Студент</span>
+                        {% elif enrollments %}
+                            <span class="badge badge--soon" title="Проходит бесплатные курсы без зачисления">Свободный слушатель</span>
+                        {% else %}
+                            <span class="badge badge--registration" title="Не зачислен: доступны свободные курсы">Пользователь (не на основе)</span>
+                        {% endif %}
+                    </h1>
+                </div>
             </div>
             <div class="office-head__actions">
                 <a class="btn btn--ghost btn--sm" href="{% url 'accounts:profile' %}">Профиль</a>
+                {% if has_payments %}
+                    <a class="btn btn--ghost btn--sm" href="{% url 'payments:my' %}">Платежи{% if my_unpaid %} <span class="badge badge--registration">{{ my_unpaid }}</span>{% endif %}</a>
+                {% endif %}
                 <a class="btn btn--ghost btn--sm" href="{% url 'grading:transcript' %}">Выписка</a>
                 <form method="post" action="{% url 'accounts:logout' %}">
                     {% csrf_token %}
@@ -20,6 +38,24 @@
                 </form>
             </div>
         </div>
+
+        {# ─── Ближайшая онлайн-встреча ─── #}
+        {% if next_meeting %}
+            <div class="office-block">
+                <h2 class="office-block__t">Ближайшая онлайн-встреча</h2>
+                <div class="meeting-card is-live-narrow">
+                    <div class="meeting-card__head">
+                        <span class="badge badge--{{ next_meeting.status }}">
+                            {{ next_meeting.status_display }}
+                        </span>
+                        <time>{{ next_meeting.starts_at|date:"l, d.m.Y" }} · {{ next_meeting.starts_at|date:"H:i" }}</time>
+                    </div>
+                    <h3 class="meeting-card__t">{{ next_meeting.title }}</h3>
+                    {% if next_meeting.course %}<p class="meeting-card__course">{{ next_meeting.course.title }}</p>{% endif %}
+                    {% if has_meetings %}<a class="btn btn--ghost btn--sm" href="{% url 'meetings:list' %}">Все встречи</a>{% endif %}
+                </div>
+            </div>
+        {% endif %}
 
         {# ─── Задания к сдаче ─── #}
         {% if pending_assignments %}
@@ -32,7 +68,9 @@
                                 <strong>{{ assignment.course.title }}</strong> — {{ assignment.title }}
                             </a>
                             {% if assignment.due_at %}
-                                <span class="task-list__due">до {{ assignment.due_at|date:"d.m.Y H:i" }}</span>
+                                <span class="task-list__due due due--{{ assignment.due_status }}">
+                                    до {{ assignment.due_at|date:"d.m.Y H:i" }} · {{ assignment.due_in }}
+                                </span>
                             {% endif %}
                         </li>
                     {% endfor %}
@@ -40,38 +78,76 @@
             </div>
         {% endif %}
 
-        {# ─── Мои курсы ─── #}
+        {# ─── Мои факультеты и курсы ─── #}
         <div class="office-block">
-            <h2 class="office-block__t">Мои курсы</h2>
-            {% if enrollments %}
+            <h2 class="office-block__t">Моё обучение</h2>
+            {% if program_rows %}
+                {% for row in program_rows %}
+                    <div class="program-card reveal">
+                        <div class="program-card__head">
+                            <div>
+                                <p class="program-card__label">Факультет</p>
+                                <h3 class="program-card__name">{{ row.program.name }}</h3>
+                            </div>
+                            <div class="program-card__stat">
+                                <span class="program-card__percent">{{ row.percent }}%</span>
+                                <span class="program-card__caption">обучение пройдено</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar__fill" style="width: {{ row.percent }}%"></div>
+                        </div>
+                        {% if row.program.summary %}<p class="program-card__summary">{{ row.program.summary }}</p>{% endif %}
+
+                        <div class="office-courses">
+                            {% for enrollment in row.items %}
+                                <div class="course-progress">
+                                    <div class="course-progress__head">
+                                        <a class="course-progress__title" href="{% url 'courses:detail' enrollment.course.slug %}">
+                                            {{ enrollment.course.title }}
+                                        </a>
+                                        <span class="badge badge--{{ enrollment.course.status }}">{{ enrollment.course.get_status_display }}</span>
+                                    </div>
+
+                                    <div class="progress-bar">
+                                        <div class="progress-bar__fill" style="width: {{ enrollment.percent }}%"></div>
+                                    </div>
+                                    <div class="course-progress__meta">
+                                        Пройдено {{ enrollment.lessons_done }} из {{ enrollment.lessons_total }} уроков · {{ enrollment.percent }}%
+                                    </div>
+
+                                    {% with grade=grades|get_item:enrollment.pk %}
+                                        <div class="course-progress__grade">
+                                            <span>Экзамен <strong>{{ grade.exam }}</strong>/70</span>
+                                            <span>Задания <strong>{{ grade.assignments }}</strong>/25</span>
+                                            <span>Активность <strong>{{ grade.activity }}</strong>/5</span>
+                                            <span class="course-progress__total {% if grade.passed %}is-passed{% endif %}">
+                                                Итог: <strong>{{ grade.total }}</strong>/100
+                                                {% if grade.passed %}(зачёт){% endif %}
+                                            </span>
+                                        </div>
+                                    {% endwith %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% elif enrollments %}
                 <div class="office-courses">
                     {% for enrollment in enrollments %}
-                        <div class="course-progress reveal">
+                        <div class="course-progress">
                             <div class="course-progress__head">
                                 <a class="course-progress__title" href="{% url 'courses:detail' enrollment.course.slug %}">
                                     {{ enrollment.course.title }}
                                 </a>
                                 <span class="badge badge--{{ enrollment.course.status }}">{{ enrollment.course.get_status_display }}</span>
                             </div>
-
                             <div class="progress-bar">
                                 <div class="progress-bar__fill" style="width: {{ enrollment.percent }}%"></div>
                             </div>
                             <div class="course-progress__meta">
                                 Пройдено {{ enrollment.lessons_done }} из {{ enrollment.lessons_total }} уроков · {{ enrollment.percent }}%
                             </div>
-
-                            {% with grade=grades|get_item:enrollment.pk %}
-                                <div class="course-progress__grade">
-                                    <span>Экзамен <strong>{{ grade.exam }}</strong>/70</span>
-                                    <span>Задания <strong>{{ grade.assignments }}</strong>/25</span>
-                                    <span>Активность <strong>{{ grade.activity }}</strong>/5</span>
-                                    <span class="course-progress__total {% if grade.passed %}is-passed{% endif %}">
-                                        Итог: <strong>{{ grade.total }}</strong>/100
-                                        {% if grade.passed %}(зачёт){% endif %}
-                                    </span>
-                                </div>
-                            {% endwith %}
                         </div>
                     {% endfor %}
                 </div>

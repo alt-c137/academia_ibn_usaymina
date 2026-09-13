@@ -44,6 +44,16 @@ class HomeView(TemplateView):
             context["latest_posts"] = Post.objects.filter(is_published=True)[:3]
             context["faqs"] = FAQ.objects.filter(is_published=True).order_by("order")[:6]
 
+        # Витрина книг на главной: 4 первых издания (если модуль включён
+        # и учитель не выключил раздел в админке)
+        if apps.is_installed("apps.books"):
+            from apps.books.models import Book
+            from apps.core.models import SiteInfo
+
+            site = SiteInfo.load()
+            if site is None or site.show_books:
+                context["home_books"] = Book.objects.filter(is_published=True)[:4]
+
         return context
 
 

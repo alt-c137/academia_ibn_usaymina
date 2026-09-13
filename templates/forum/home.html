@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Форум — {{ site_title }}{% endblock %}
+{% block description %}Статьи, темы и вопросы сообщества платформы.{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <div class="forum-head">
+            <div>
+                <p class="eyebrow reveal">Сообщество</p>
+                <h1 class="sec-title reveal">Форум</h1>
+                <p class="sec-lead reveal">
+                    Статьи, вопросы и темы от студентов и учителей. Публикации
+                    обычных пользователей проходят модерацию перед появлением.
+                </p>
+            </div>
+            {% if user.is_authenticated and not user.is_banned %}
+                <a class="btn btn--primary" href="{% url 'forum:thread_new' %}">Создать тему</a>
+            {% endif %}
+        </div>
+
+        <div class="forum-boards">
+            {% for board in boards %}
+                <a class="forum-board reveal" href="{{ board.get_absolute_url }}">
+                    <div>
+                        <h2 class="forum-board__t">{{ board.name }}</h2>
+                        {% if board.description %}<p class="forum-board__d">{{ board.description }}</p>{% endif %}
+                    </div>
+                    <div class="forum-board__meta">
+                        <span><strong>{{ board.threads_pub }}</strong> тем</span>
+                        {% if board.last_activity %}
+                            <span class="forum-board__last">последняя активность: {{ board.last_activity|date:"d.m.Y" }}</span>
+                        {% else %}
+                            <span class="forum-board__last">пока тихо</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% empty %}
+                <p class="sec-lead">Разделы форума скоро откроются.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

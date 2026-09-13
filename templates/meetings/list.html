@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Онлайн-встречи — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow reveal">Прямой эфир</p>
+        <h1 class="sec-title reveal">Онлайн-лекции и встречи</h1>
+        <p class="sec-lead reveal">
+            Учитель преподаёт вживую по ссылке (Zoom / Google Meet / трансляция).
+            Ссылка подключения появляется за 15 минут до начала — и на время встречи.
+        </p>
+
+        <h2 class="office-block__t">Предстоящие</h2>
+        {% if upcoming %}
+            <div class="meeting-list">
+                {% for meeting in upcoming %}
+                    <div class="meeting-card reveal {% if meeting.status == 'live' %}is-live{% endif %}">
+                        <div class="meeting-card__head">
+                            <span class="badge badge--{{ meeting.status|default:'soon' }}">
+                                {{ meeting.status_display }}
+                            </span>
+                            <time class="meeting-card__time" datetime="{{ meeting.starts_at|date:'c' }}">
+                                {{ meeting.starts_at|date:"l, d.m.Y" }} · {{ meeting.starts_at|date:"H:i" }}
+                                ({{ meeting.duration_min }} мин)
+                            </time>
+                        </div>
+                        <h3 class="meeting-card__t">{{ meeting.title }}</h3>
+                        {% if meeting.course %}
+                            <p class="meeting-card__course">Курс: {{ meeting.course.title }}</p>
+                        {% endif %}
+                        {% if meeting.description %}
+                            <div class="rich-text">{{ meeting.description|linebreaks }}</div>
+                        {% endif %}
+                        {% if meeting.show_link and meeting.link %}
+                            <a class="btn btn--primary btn--sm" href="{{ meeting.link }}" target="_blank" rel="noopener">
+                                Подключиться к встрече
+                            </a>
+                        {% elif meeting.link %}
+                            <p class="form-hint">Ссылка откроется за 15 минут до начала.</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="sec-lead">Запланированных встреч пока нет — следите за новостями.</p>
+        {% endif %}
+
+        {% if past %}
+            <h2 class="office-block__t">Прошедшие</h2>
+            <ul class="meeting-past">
+                {% for meeting in past %}
+                    <li>
+                        <time>{{ meeting.starts_at|date:"d.m.Y H:i" }}</time> — {{ meeting.title }}
+                        {% if meeting.course %}· {{ meeting.course.title }}{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Новая тема — Форум — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--form">
+        <nav class="breadcrumbs">
+            <a href="{% url 'forum:home' %}">Форум</a> / <span>Новая тема</span>
+        </nav>
+
+        <p class="eyebrow">Форум</p>
+        <h1 class="sec-title">Новая тема</h1>
+        <p class="sec-lead">
+            Тема появится после проверки модератором. Пишите по существу и
+            с адабом — джазакаЛлаху хайран.
+        </p>
+
+        <form class="card" method="post">
+            {% csrf_token %}
+            <label class="label" for="{{ form.title.id_for_label }}">Заголовок</label>
+            {{ form.title }} {{ form.title.errors }}
+            <label class="label" for="{{ form.body.id_for_label }}">Текст</label>
+            {{ form.body }} {{ form.body.errors }}
+            <button class="btn btn--primary" type="submit">Отправить</button>
+            <a class="btn btn--ghost" href="{% url 'forum:home' %}">Отмена</a>
+        </form>
+    </div>
+</section>
+{% endblock %}

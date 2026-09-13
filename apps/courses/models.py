@@ -52,6 +52,11 @@ class Course(TimeStampedModel):
     description = models.TextField("Подробное описание", blank=True)
     status = models.CharField("Статус", max_length=20, choices=Status.choices, default=Status.SOON)
     cover = models.ImageField("Обложка", upload_to="courses/covers/", blank=True)
+    is_free = models.BooleanField(
+        "Свободный доступ", default=False,
+        help_text="Курс открыт без зачисления: любой зарегистрированный может "
+                  "проходить уроки и тесты как свободный слушатель (решает админ)",
+    )
 
     registration_start = models.DateField("Начало регистрации", null=True, blank=True)
     registration_end = models.DateField("Конец регистрации", null=True, blank=True)
@@ -139,6 +144,7 @@ class Enrollment(TimeStampedModel):
         ACTIVE = "active", "Учится"
         COMPLETED = "completed", "Завершил"
         DROPPED = "dropped", "Бросил"
+        LISTENER = "listener", "Слушатель (свободно)"
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="enrollments",

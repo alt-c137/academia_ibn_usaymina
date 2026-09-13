@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ board.name }} — Форум — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <nav class="breadcrumbs">
+            <a href="{% url 'forum:home' %}">Форум</a> / <span>{{ board.name }}</span>
+        </nav>
+
+        <div class="forum-head">
+            <div>
+                <h1 class="sec-title">{{ board.name }}</h1>
+                {% if board.description %}<p class="sec-lead">{{ board.description }}</p>{% endif %}
+            </div>
+            {% if user.is_authenticated and not user.is_banned %}
+                <a class="btn btn--primary" href="{% url 'forum:thread_new' %}?board={{ board.slug }}">Создать тему</a>
+            {% endif %}
+        </div>
+
+        <div class="forum-threads">
+            {% for thread in threads %}
+                <a class="forum-thread {% if not thread.is_approved %}is-pending{% endif %}" href="{{ thread.get_absolute_url }}">
+                    <div class="forum-thread__main">
+                        <span class="forum-thread__t">
+                            {% if thread.is_pinned %}📌 {% endif %}{{ thread.title }}
+                            {% if not thread.is_approved %}<span class="badge badge--soon">на модерации — видна только вам</span>{% endif %}
+                            {% if thread.is_closed %}<span class="badge badge--finished">закрыта</span>{% endif %}
+                        </span>
+                        <span class="forum-thread__meta">
+                            {{ thread.author|default:"удалённый автор" }} · {{ thread.created_at|date:"d.m.Y H:i" }} · {{ thread.views }} просм.
+                        </span>
+                    </div>
+                    <span class="forum-thread__replies">
+                        <strong>{{ thread.replies }}</strong> ответ{{ thread.replies|pluralize:"а,ов" }}
+                    </span>
+                </a>
+            {% empty %}
+                <p class="sec-lead">В этом разделе пока нет тем. Начните первую!</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

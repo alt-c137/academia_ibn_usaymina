@@ -8,6 +8,8 @@ E-MAIL, поля «имя пользователя» (username) нет вооб�
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
+from apps.core.validators import IMAGE_TYPES, FileValidator
+
 
 class UserManager(UserManager):
     """Менеджер, создающий пользователей по e-mail (используется командой
@@ -47,6 +49,38 @@ class User(AbstractUser):
     last_name = models.CharField("Фамилия", max_length=150, blank=True)
     phone = models.CharField("Телефон", max_length=25, blank=True)
     telegram = models.CharField("Telegram (без @)", max_length=60, blank=True)
+    avatar = models.ImageField(
+        "Аватар", upload_to="accounts/avatars/%Y/", blank=True,
+        validators=[FileValidator(IMAGE_TYPES, max_size_mb=2)],
+        help_text="Квадратная картинка до 2 МБ (jpg, png, webp)",
+    )
+
+    # Блокировка (бан): админ указывает срок и причину. Заблокированный
+    # может входить и учиться, но не может публиковать на форуме.
+    banned_until = models.DateTimeField("Заблокирован до", null=True, blank=True)
+    ban_reason = models.CharField("Причина блокировки", max_length=300, blank=True)
+
+    @property
+    def initials(self) -> str:
+        """Буквы для кружка-заглушки, пока аватар не загружен."""
+        return (self.first_name[:1] or self.email[:1]).upper()
+
+    @property
+    def is_student(self) -> bool:
+        """Зачислен ли на основную программу (не слушатель и не бросил)."""
+        from apps.courses.models import Enrollment
+
+        if not self.is_authenticated:
+            return False
+        return self.enrollments.exclude(
+            status__in=[Enrollment.Status.DROPPED, Enrollment.Status.LISTENER]
+        ).exists()
+
+    @property
+    def is_banned(self) -> bool:
+        from django.utils import timezone
+
+        return bool(self.banned_until and self.banned_until > timezone.now())
 
     USERNAME_FIELD = "email"  # чем пользователь логинится
     REQUIRED_FIELDS = []     # при createsuperuser спрашиваем только e-mail и пароль

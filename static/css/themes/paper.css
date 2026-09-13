@@ -1,0 +1,56 @@
+/* ============================================================
+   ТЕМА «КЛАССИКА» (paper) — основная
+   Слоновая кость + глубокий изумруд + золото, серифные заголовки,
+   тёмные академические полосы (hero, призыв, подвал).
+
+   Включается атрибутом <html data-theme="paper"> (или без атрибута).
+   Хочешь другую гамму — правь переменные ниже: весь сайт перестроится.
+   ============================================================ */
+:root[data-theme="paper"],
+:root:not([data-theme="sand"]) {
+    --bg: #F7F3E9;            /* основной фон — слоновая кость */
+    --bg-alt: #EFE9DA;        /* секции-компаньоны */
+    --surface: #FFFFFF;       /* карточки */
+    --surface-2: #FBF8F1;     /* вложенные поверхности */
+    --ink: #23241D;           /* основной текст */
+    --ink-soft: #5D5747;      /* второстепенный текст */
+
+    --accent: #1A5238;        /* глубокий изумруд */
+    --accent-strong: #103A27;
+    --accent-soft: #E2ECE4;   /* подложка акцента */
+    --on-accent: #F6F2E6;
+    --gold: #A67C24;          /* золото статусов и орнаментов */
+    --gold-bright: #D3AC4E;   /* золото на тёмном фоне */
+    --gold-soft: #F3E8CB;
+    --line: #E1D9C6;
+
+    --danger: #A8402F;
+    --danger-soft: #F7E4E0;
+    --success: #1F6B45;
+    --success-soft: #E2ECE4;
+    --warning: #8A6116;
+    --warning-soft: #F6EDD6;
+
+    --shadow: 0 14px 36px rgba(28, 36, 26, 0.12);
+    --shadow-sm: 0 6px 20px rgba(28, 36, 26, 0.09);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --border: 1px solid var(--line);
+    --ornament-display: none; /* крупная звезда — только в теме «минимал» */
+
+    /* Тёмная академическая полоса (hero, призыв) */
+    --band-1: #123B28;        /* изумрудная глубина */
+    --band-2: #1E5A3D;
+    --band-ink: #F4EEDC;      /* текст на полосе */
+    --band-soft: rgba(244, 238, 220, 0.78);
+    --band-line: rgba(244, 238, 220, 0.35);
+
+    /* Подвал */
+    --footer-bg: #10291D;
+    --footer-ink: #CFC9B4;
+    --footer-strong: #F4EEDC;
+
+    --font-title: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --title-weight: 700;
+    --title-tracking: -0.012em;
+}

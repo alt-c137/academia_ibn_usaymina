@@ -23,6 +23,11 @@ def is_teacher(user) -> bool:
     )
 
 
+def is_moderator(user) -> bool:
+    """Модератор контента (форум) — те же учителя и админы."""
+    return is_teacher(user)
+
+
 class TeacherRequiredMixin(LoginRequiredMixin):
     """Примесь для страниц учительской: анонима отправляет на вход,
     вошедшего не-учителя — разворачивает с 403."""

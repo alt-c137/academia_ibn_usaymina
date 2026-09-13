@@ -10,14 +10,26 @@ from django.core.cache import cache
 def site_info(request):
     from apps.core.models import SiteInfo
 
+    site = SiteInfo.load()
     context = {
-        "site": SiteInfo.load(),
-        "site_title": settings.SITE_NAME,
+        "site": site,
+        # Название в шапке: сначала из админки (меняется на лету),
+        # затем из .env (SITE_NAME), затем запасной вариант.
+        "site_title": (site.site_name if site else "") or settings.SITE_NAME,
         "has_exams": django_apps.is_installed("apps.exams"),
         "has_assignments": django_apps.is_installed("apps.assignments"),
         "has_grading": django_apps.is_installed("apps.grading"),
         "has_library": django_apps.is_installed("apps.library"),
         "has_news": django_apps.is_installed("apps.news"),
+        "has_meetings": django_apps.is_installed("apps.meetings"),
+        "has_forum": django_apps.is_installed("apps.forum"),
+        "has_payments": django_apps.is_installed("apps.payments"),
+        # Книги: модуль включён И переключатель в админке включён
+        # (нет записи в админке — считаем включённым)
+        "has_books": (
+            django_apps.is_installed("apps.books")
+            and (site is None or site.show_books)
+        ),
     }
 
     # Ссылка «Учительская» + счётчик непроверенного (кэш на минуту,
@@ -37,6 +49,16 @@ def site_info(request):
                 pending = _count_pending()
                 cache.set("teacher_pending_count", pending, 60)
             context["teacher_pending"] = pending
+
+            # Очередь модерации форума (модуль forum)
+            if django_apps.is_installed("apps.forum"):
+                from apps.forum.models import Thread
+
+                forum_pending = cache.get("forum_pending_count")
+                if forum_pending is None:
+                    forum_pending = Thread.objects.filter(is_approved=False).count()
+                    cache.set("forum_pending_count", forum_pending, 60)
+                context["forum_pending"] = forum_pending
 
     return context
 

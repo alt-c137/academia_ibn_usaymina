@@ -75,9 +75,12 @@ class ProfileForm(UserChangeForm):
 
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "email", "phone", "telegram")
+        fields = ("avatar", "first_name", "last_name", "email", "phone", "telegram")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.setdefault("class", "input")
+        self.fields["avatar"].widget.attrs.update(
+            {"accept": "image/jpeg,image/png,image/webp"}
+        )

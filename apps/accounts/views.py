@@ -34,6 +34,37 @@ class ProfileView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         return self.request.user  # редактируем только себя
 
+    def get_context_data(self, **kwargs):
+        """Краткая сводка рядом с настройками: программы, прогресс, дедлайны."""
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        from django.utils import timezone
+
+        from apps.assignments.models import Assignment
+        from apps.courses.models import Enrollment
+
+        enrollments = list(
+            user.enrollments.exclude(status__in=[
+                "dropped", "listener",
+            ]).select_related("course", "course__program")
+        )
+        context["enrollments"] = enrollments
+        if enrollments:
+            context["overall_percent"] = round(
+                sum(e.percent for e in enrollments) / len(enrollments)
+            )
+        context["next_due"] = (
+            Assignment.objects.filter(
+                course_id__in=[e.course_id for e in enrollments],
+                is_published=True,
+                due_at__gte=timezone.now(),
+            )
+            .order_by("due_at")
+            .first()
+        )
+        return context
+
     def form_valid(self, form):
         messages.success(self.request, "Профиль обновлён.")
         return super().form_valid(form)

@@ -7,6 +7,17 @@ from .base import *  # noqa: F401,F403
 
 DEBUG = False
 
+# Ключ обязателен в проде: без него сайт не запустится вовсе,
+# а не будет молча работать на девелоперском ключе из base.py.
+SECRET_KEY = os.getenv("SECRET_KEY", "")
+if len(SECRET_KEY) < 50 or SECRET_KEY == "dev-insecure-key-change-me":
+    raise RuntimeError(
+        "Для продакшена задай SECRET_KEY в .env (минимум 50 символов). "
+        'Сгенерировать: python -c "import secrets; print(secrets.token_urlsafe(60))"'
+    )
+if not any(h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",")):
+    raise RuntimeError("Для продакшена задай ALLOWED_HOSTS в .env (например: academy.example.com)")
+
 # Сжатая статика с хэшами в именах (WhiteNoise): клиент всегда получает свежие файлы
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

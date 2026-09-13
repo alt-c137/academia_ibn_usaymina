@@ -22,7 +22,11 @@ urlpatterns = [
     path("assignments/", include("apps.assignments.urls")),  # отправка заданий
     path("office/", include("apps.grading.urls")),           # кабинет студента, выписка
     path("library/", include("apps.library.urls")),          # библиотека материалов
+    path("books/", include("apps.books.urls")),              # продажа книг (отключаемый модуль)
+    path("payments/", include("apps.payments.urls")),        # мои платежи (отключаемый модуль)
+    path("forum/", include("apps.forum.urls")),              # форум (отключаемый модуль)
     path("teacher/", include("apps.teacher.urls")),          # учительская: проверка
+    path("meetings/", include("apps.meetings.urls")),        # онлайн-встречи (созвоны)
     path("", include("apps.news.urls")),                     # новости, FAQ
     path("sitemap.xml", sitemap_view, name="sitemap"),       # карта сайта для поисковиков
 ]
