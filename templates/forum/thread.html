@@ -12,9 +12,10 @@
         </nav>
 
         {% if not thread.is_approved %}
-            <p class="msg msg--warning">
-                Тема на модерации: видна только вам и модераторам.
-            </p>
+            <p class="msg msg--warning">Тема на модерации: видна только вам и модераторам.</p>
+        {% endif %}
+        {% if thread.is_private %}
+            <p class="msg msg--info">🔒 Приватный вопрос: виден только вам и учителям.</p>
         {% endif %}
 
         <article class="forum-post is-op">
@@ -34,14 +35,27 @@
             <div class="forum-post__body">
                 <h1 class="forum-post__title">{{ thread.title }}</h1>
                 <div class="rich-text">{{ thread.body|linebreaks }}</div>
-                <div class="forum-post__time">{{ thread.created_at|date:"d.m.Y H:i" }} · {{ thread.views }} просмотров</div>
+                <div class="forum-post__time">
+                    {{ thread.created_at|date:"d.m.Y H:i" }} · {{ thread.views }} просмотров
+                    · {{ thread.get_who_can_answer_display|lower }}
+                </div>
+
+                {# Тумблер комментариев: автор или модератор #}
+                {% if is_owner or is_moderator %}
+                    <form class="forum-inline-form" method="post" action="{% url 'forum:thread_comments' thread.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn--ghost btn--sm" type="submit">
+                            {% if thread.allow_comments %}Отключить комментарии{% else %}Включить комментарии{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
             </div>
         </article>
 
         <h2 class="office-block__t">Ответы ({{ posts|length }})</h2>
         <div class="forum-posts">
             {% for post in posts %}
-                <article class="forum-post" id="post-{{ post.pk }}">
+                <article class="forum-post {% if post.is_official %}is-official{% endif %}" id="post-{{ post.pk }}">
                     <div class="forum-post__side">
                         {% if post.author and post.author.avatar %}
                             <img class="avatar avatar--md" src="{{ post.author.avatar.url }}" alt="">
@@ -51,8 +65,23 @@
                         <span class="forum-post__author">{{ post.author|default:"удалённый автор" }}</span>
                     </div>
                     <div class="forum-post__body">
+                        {% if post.is_official %}
+                            <span class="badge badge--registration forum-official">✓ Ответ учителя</span>
+                        {% elif post.author and post.author.is_staff %}
+                            <span class="badge badge--finished">преподаватель</span>
+                        {% elif post.author and post.author.is_trusted %}
+                            <span class="badge badge--active">доверенное лицо</span>
+                        {% endif %}
                         <div class="rich-text">{{ post.body|linebreaks }}</div>
                         <div class="forum-post__time">{{ post.created_at|date:"d.m.Y H:i" }}</div>
+                        {% if can_mark_official %}
+                            <form class="forum-inline-form" method="post" action="{% url 'forum:post_official' post.pk %}">
+                                {% csrf_token %}
+                                <button class="btn btn--ghost btn--sm" type="submit">
+                                    {% if post.is_official %}Снять пометку{% else %}Пометить «ответ учителя»{% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                 </article>
             {% empty %}
@@ -65,13 +94,22 @@
                 {% csrf_token %}
                 <label class="label" for="{{ form.body.id_for_label }}">Ваш ответ</label>
                 {{ form.body }} {{ form.body.errors }}
+                {% if form.is_official %}
+                    <label class="check">{{ form.is_official }} {{ form.is_official.label }}</label>
+                {% endif %}
                 <button class="btn btn--primary" type="submit">Отправить ответ</button>
             </form>
-        {% elif thread.is_closed %}
-            <p class="msg msg--info">Тема закрыта модератором.</p>
+        {% elif not comments_open %}
+            <p class="msg msg--info">
+                {% if not thread.allow_comments %}Автор закрыл комментарии в этой теме.
+                {% elif thread.is_closed %}Тема закрыта модератором.
+                {% else %}Комментарии на форуме сейчас отключены.{% endif %}
+            </p>
         {% elif user.is_authenticated and user.is_banned %}
             <p class="msg msg--warning">Вы заблокированы до {{ user.banned_until|date:"d.m.Y" }} — публикация недоступна.</p>
-        {% elif not user.is_authenticated %}
+        {% elif user.is_authenticated %}
+            <p class="msg msg--info">В этой теме отвечают только учителя и доверенные лица.</p>
+        {% else %}
             <p class="msg msg--info"><a href="{% url 'accounts:login' %}">Войдите</a>, чтобы отвечать.</p>
         {% endif %}
     </div>

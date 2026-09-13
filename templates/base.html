@@ -25,7 +25,7 @@
             <span class="logo__text">{{ site_title }}</span>
         </a>
 
-        <nav class="nav" id="nav">
+        <nav class="nav" id="nav" aria-label="Основная навигация">
             <a class="nav__link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}"
                href="{% url 'core:home' %}">Главная</a>
             <a class="nav__link {% if request.resolver_match.app_name == 'courses' %}is-active{% endif %}"
@@ -33,10 +33,6 @@
             {% if has_library %}
                 <a class="nav__link {% if request.resolver_match.app_name == 'library' %}is-active{% endif %}"
                    href="{% url 'library:index' %}">Библиотека</a>
-            {% endif %}
-            {% if has_books %}
-                <a class="nav__link {% if request.resolver_match.app_name == 'books' %}is-active{% endif %}"
-                   href="{% url 'books:index' %}">Книги</a>
             {% endif %}
             {% if has_meetings %}
                 <a class="nav__link {% if request.resolver_match.app_name == 'meetings' %}is-active{% endif %}"
@@ -46,20 +42,41 @@
                 <a class="nav__link {% if request.resolver_match.app_name == 'forum' %}is-active{% endif %}"
                    href="{% url 'forum:home' %}">Форум</a>
             {% endif %}
-            {% if has_news %}
-                <a class="nav__link {% if request.resolver_match.url_name == 'list' %}is-active{% endif %}"
-                   href="{% url 'news:list' %}">Новости</a>
-                <a class="nav__link {% if request.resolver_match.url_name == 'faq' %}is-active{% endif %}"
-                   href="{% url 'news:faq' %}">Вопросы</a>
-            {% endif %}
-            <a class="nav__link {% if request.resolver_match.url_name == 'contact' %}is-active{% endif %}"
-               href="{% url 'core:contact' %}">Контакты</a>
+
+            {# Второстепенные разделы — под одной кнопкой «Ещё» (на телефоне раскрываются списком) #}
+            <div class="nav__more">
+                <button class="nav__link nav__more-btn" type="button" aria-haspopup="true">
+                    Ещё
+                    <svg class="nav__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="nav__dropdown">
+                    {% if has_books %}
+                        <a href="{% url 'books:index' %}"
+                           class="{% if request.resolver_match.app_name == 'books' %}is-active{% endif %}">Книги</a>
+                    {% endif %}
+                    {% if has_news %}
+                        <a href="{% url 'news:list' %}"
+                           class="{% if request.resolver_match.url_name == 'list' %}is-active{% endif %}">Новости</a>
+                        <a href="{% url 'news:faq' %}"
+                           class="{% if request.resolver_match.url_name == 'faq' %}is-active{% endif %}">Вопросы</a>
+                    {% endif %}
+                    <a href="{% url 'core:contact' %}"
+                       class="{% if request.resolver_match.url_name == 'contact' %}is-active{% endif %}">Контакты</a>
+                    {% if user_is_teacher and has_forum %}
+                        <a href="{% url 'forum:moderation' %}" class="nav__dropdown-mod">
+                            Модерация{% if forum_pending %} <span class="badge badge--registration">{{ forum_pending }}</span>{% endif %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
         </nav>
 
         <div class="header__actions">
             <div class="theme-switch" title="Оформление">
                 <button class="theme-switch__btn" data-set-theme="paper" type="button">Классика</button>
                 <button class="theme-switch__btn" data-set-theme="sand" type="button">Минимал</button>
+                <button class="theme-switch__btn" data-set-theme="night" type="button">Ночь</button>
             </div>
 
             {% if user.is_authenticated %}
@@ -67,11 +84,6 @@
                     <a class="btn btn--ghost btn--sm teacher-link" href="{% url 'teacher:dashboard' %}">
                         Учительская{% if teacher_pending %} <span class="badge badge--registration">{{ teacher_pending }}</span>{% endif %}
                     </a>
-                    {% if has_forum and forum_pending %}
-                        <a class="btn btn--ghost btn--sm teacher-link" href="{% url 'forum:moderation' %}">
-                            Модерация <span class="badge badge--registration">{{ forum_pending }}</span>
-                        </a>
-                    {% endif %}
                 {% endif %}
                 <a class="office-link btn btn--ghost btn--sm" href="{% url 'grading:office' %}" title="Кабинет">
                     {% if user.avatar %}
@@ -86,7 +98,7 @@
                 <a class="btn btn--primary btn--sm" href="{% url 'accounts:register' %}">Записаться</a>
             {% endif %}
 
-            <button class="burger" id="burger" type="button" aria-label="Меню">
+            <button class="burger" id="burger" type="button" aria-label="Меню" aria-expanded="false">
                 <span></span><span></span><span></span>
             </button>
         </div>

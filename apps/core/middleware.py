@@ -1,11 +1,14 @@
 """
-Тема оформления. У каждой страницы может быть один из двух видов:
-  paper — «классика» (как у hdat.sa): светлая бумажная тема
-  sand  — «минимал»: бежевая тема с арабским орнаментом
+Тема оформления. Доступные виды:
+  paper — «классика»: слоновая кость + изумруд + золото
+  sand  — «минимал»: бежевая с арабским орнаментом
+  night — «ночь»: тёмная, золото на тёмном мхe
 
 Выбор хранится в cookie «theme» (живёт год). Cookie, а не только localStorage,
 чтобы сервер сразу отдавал правильную тему — без мигания при загрузке.
 """
+
+THEMES = ("paper", "sand", "night")
 
 
 class ThemeMiddleware:
@@ -14,7 +17,7 @@ class ThemeMiddleware:
 
     def __call__(self, request):
         theme = request.COOKIES.get("theme")
-        if theme not in ("paper", "sand"):
+        if theme not in THEMES:
             from django.conf import settings
 
             theme = settings.SITE_THEME_DEFAULT

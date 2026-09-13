@@ -41,7 +41,22 @@ class Board(TimeStampedModel):
 
 
 class Thread(TimeStampedModel):
-    """Тема форума: первый пост + обсуждение."""
+    """Тема форума: первый пост + обсуждение.
+
+    Настройки темы (выбирает автор при создании, модератор может менять):
+      visibility     — видно всем или только учителям (приватный вопрос)
+      who_can_answer — отвечают все или только учителя и доверенные лица
+      allow_comments — комментарии включены (плюс глобальный выключатель
+                       в «Контакты сайта» → forum_comments_enabled)
+    """
+
+    class Visibility(models.TextChoices):
+        PUBLIC = "public", "Видно всем"
+        TEACHERS_ONLY = "teachers", "Видно учителям (приватный вопрос)"
+
+    class WhoCanAnswer(models.TextChoices):
+        ANYONE = "anyone", "Отвечают все"
+        TEACHERS_TRUSTED = "teachers", "Отвечают учителя и доверенные"
 
     board = models.ForeignKey(
         Board, on_delete=models.CASCADE, related_name="threads", verbose_name="Раздел"
@@ -52,6 +67,15 @@ class Thread(TimeStampedModel):
     )
     title = models.CharField("Заголовок", max_length=250)
     body = models.TextField("Текст темы")
+    visibility = models.CharField(
+        "Кто видит", max_length=10, choices=Visibility.choices,
+        default=Visibility.PUBLIC,
+    )
+    who_can_answer = models.CharField(
+        "Кто может отвечать", max_length=10, choices=WhoCanAnswer.choices,
+        default=WhoCanAnswer.ANYONE,
+    )
+    allow_comments = models.BooleanField("Комментарии разрешены", default=True)
     is_approved = models.BooleanField("Одобрено модератором", default=False)
     is_pinned = models.BooleanField("Закреплено", default=False)
     is_closed = models.BooleanField("Закрыто для ответов", default=False)
@@ -71,6 +95,10 @@ class Thread(TimeStampedModel):
         return reverse("forum:thread", kwargs={"pk": self.pk})
 
     @property
+    def is_private(self) -> bool:
+        return self.visibility == self.Visibility.TEACHERS_ONLY
+
+    @property
     def posts_count(self) -> int:
         return self.posts.count()
 
@@ -81,7 +109,8 @@ class Thread(TimeStampedModel):
 
 
 class Post(TimeStampedModel):
-    """Ответ в теме."""
+    """Ответ в теме. Учитель/админ может пометить ответ как официальный
+    («Ответ учителя»); у доверенного лица — свой бейдж."""
 
     thread = models.ForeignKey(
         Thread, on_delete=models.CASCADE, related_name="posts", verbose_name="Тема"
@@ -91,6 +120,9 @@ class Post(TimeStampedModel):
         related_name="forum_posts", verbose_name="Автор",
     )
     body = models.TextField("Текст ответа")
+    is_official = models.BooleanField(
+        "Официальный ответ учителя", default=False,
+    )
 
     class Meta:
         verbose_name = "Ответ форума"

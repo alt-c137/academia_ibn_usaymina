@@ -60,6 +60,12 @@ class User(AbstractUser):
     banned_until = models.DateTimeField("Заблокирован до", null=True, blank=True)
     ban_reason = models.CharField("Причина блокировки", max_length=300, blank=True)
 
+    # Доверенное лицо: не учитель, но может отвечать на форуме там, где
+    # отвечать разрешено только «учителям и доверенным». Ставит галочку админ.
+    is_trusted = models.BooleanField(
+        "Доверенное лицо (может отвечать на форуме)", default=False,
+    )
+
     @property
     def initials(self) -> str:
         """Буквы для кружка-заглушки, пока аватар не загружен."""

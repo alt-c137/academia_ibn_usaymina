@@ -1,0 +1,82 @@
+/* ============================================================
+   ТЕМА «НОЧЬ» (night) — кардинально новая, тёмная
+   Глубокий тёмный мох + золото: вечерняя академия при лампе.
+   Все компоненты сайта работают на тех же переменных — тема
+   подключается одним файлом, разметка не трогается.
+
+   Включается атрибутом <html data-theme="night">.
+   Сделать основной: .env → SITE_THEME_DEFAULT=night
+   ============================================================ */
+:root[data-theme="night"] {
+    --bg: #10150F;            /* тёмный мох */
+    --bg-alt: #171E16;        /* секции-компаньоны */
+    --surface: #1B231B;       /* карточки */
+    --surface-2: #212B21;     /* вложенные поверхности */
+    --ink: #EAE6D8;           /* основной текст — тёплая слоновая кость */
+    --ink-soft: #A8B0A0;      /* второстепенный */
+
+    --accent: #D3AC4E;        /* золото — главный акцент */
+    --accent-strong: #E8CE8A;
+    --accent-soft: rgba(211, 172, 78, 0.14);
+    --on-accent: #201805;
+    --gold: #D3AC4E;
+    --gold-bright: #EDD79A;
+    --gold-soft: rgba(211, 172, 78, 0.16);
+    --line: #2C362B;
+
+    --danger: #E3836B;
+    --danger-soft: rgba(227, 131, 107, 0.14);
+    --success: #85C29A;
+    --success-soft: rgba(133, 194, 154, 0.13);
+    --warning: #D9B45B;
+    --warning-soft: rgba(217, 180, 91, 0.13);
+
+    --shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --border: 1px solid var(--line);
+    --ornament-display: none;
+
+    /* Полоса hero в ночи — почти чёрная, с золотым орнаментом */
+    --band-1: #0A0E09;
+    --band-2: #141C13;
+    --band-ink: #F0EADA;
+    --band-soft: rgba(240, 234, 218, 0.72);
+    --band-line: rgba(240, 234, 218, 0.22);
+
+    /* Подвал — глубже фона */
+    --footer-bg: #0A0E09;
+    --footer-ink: #9BA394;
+    --footer-strong: #F0EADA;
+
+    --font-title: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --title-weight: 700;
+    --title-tracking: -0.012em;
+}
+
+/* Ночные уточнения поверх общих стилей (подключается после main.css) */
+:root[data-theme="night"] .site-header {
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+}
+:root[data-theme="night"] .btn--primary {
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: var(--on-accent);
+    box-shadow: 0 8px 22px rgba(211, 172, 78, 0.25);
+}
+:root[data-theme="night"] .btn--primary:hover { transform: translateY(-2px); }
+:root[data-theme="night"] .hero .btn--primary {
+    box-shadow: 0 10px 30px rgba(211, 172, 78, 0.35);
+}
+:root[data-theme="night"] .hero {
+    border-bottom-color: var(--gold);
+}
+:root[data-theme="night"] .feat__ic { background: var(--accent-soft); }
+:root[data-theme="night"] .feat:hover .feat__ic { background: var(--gold-soft); }
+:root[data-theme="night"] .input,
+:root[data-theme="night"] textarea.input,
+:root[data-theme="night"] select.input { background: var(--bg-alt); }
+:root[data-theme="night"] .ring::before { background: var(--surface); }
+:root[data-theme="night"] .course-card__body::after { opacity: 0.18; }
+:root[data-theme="night"] .messenger-fallback { background: var(--gold-soft); }
+:root[data-theme="night"] .messenger-fallback .btn { background: var(--surface); }

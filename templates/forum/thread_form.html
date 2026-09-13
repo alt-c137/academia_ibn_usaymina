@@ -22,6 +22,16 @@
             {{ form.title }} {{ form.title.errors }}
             <label class="label" for="{{ form.body.id_for_label }}">Текст</label>
             {{ form.body }} {{ form.body.errors }}
+
+            <label class="label" for="{{ form.visibility.id_for_label }}">{{ form.visibility.label }}</label>
+            {{ form.visibility }} {{ form.visibility.errors }}
+            <p class="form-hint">«Видно учителям» — приватный вопрос: его увидят только вы и преподаватели.</p>
+
+            <label class="label" for="{{ form.who_can_answer.id_for_label }}">{{ form.who_can_answer.label }}</label>
+            {{ form.who_can_answer }} {{ form.who_can_answer.errors }}
+
+            <label class="check">{{ form.allow_comments }} {{ form.allow_comments.label }}</label>
+
             <button class="btn btn--primary" type="submit">Отправить</button>
             <a class="btn btn--ghost" href="{% url 'forum:home' %}">Отмена</a>
         </form>
