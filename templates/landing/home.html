@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}{{ site_title }} — системное изучение шариатских наук{% endblock %}
-{% block description %}Дистанционное обучение по книгам с сопровождением: уроки, еженедельные задания, научные встречи и экзамены с проверкой знаний. Регистрация бесплатная.{% endblock %}
+{% block description %}Дистанционное обучение по книгам с сопровождением: уроки, еженедельные задания, научные встречи и экзамены с проверкой знаний.{% endblock %}
 
 {% block content %}
 
@@ -20,13 +20,13 @@
                 Прохождение предыдущих курсов не является условием — записаться можно на любой.
             </p>
             <div class="hero__cta reveal">
-                <a class="btn btn--primary btn--lg" href="{% url 'accounts:register' %}">Записаться бесплатно</a>
+                <a class="btn btn--primary btn--lg" href="{% url 'accounts:register' %}">Записаться на обучение</a>
                 <a class="btn btn--ghost btn--lg" href="{% url 'courses:list' %}">Посмотреть курсы</a>
             </div>
             <ul class="hero__facts reveal">
                 {% if courses_count %}<li><strong>{{ courses_count }}</strong> курс{{ courses_count|pluralize:"а,ов" }} в программе</li>{% endif %}
                 <li><strong>100</strong> баллов максимум</li>
-                <li><strong>Бесплатно</strong> для всех желающих</li>
+                <li><strong>Сопровождение</strong> учителем на каждом курсе</li>
             </ul>
         </div>
         <div class="hero__ornament reveal" aria-hidden="true">
@@ -47,22 +47,30 @@
         </p>
         <div class="feat-grid">
             <div class="feat reveal">
-                <div class="feat__ic">📖</div>
+                <div class="feat__ic" aria-hidden="true">
+                    <svg class="feat__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C5.8 4.6 8 4.5 12 6c4-1.5 6.2-1.4 8-.5V18c-1.8-.9-4-1-8 .5-4-1.5-6.2-1.4-8-.5V5.5z"/><path d="M12 6v12.5"/></svg>
+                </div>
                 <h3 class="feat__t">Самостоятельное чтение</h3>
                 <p class="feat__d">Книга читается по недельным нормам — спокойно и вдумчиво, без спешки.</p>
             </div>
             <div class="feat reveal">
-                <div class="feat__ic">✍️</div>
+                <div class="feat__ic" aria-hidden="true">
+                    <svg class="feat__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16.5 4.5a2.12 2.12 0 013 3L8 19l-4 1z"/><path d="M14.5 6.5l3 3"/></svg>
+                </div>
                 <h3 class="feat__t">Еженедельные задания</h3>
                 <p class="feat__d">Закрепление прочитанного. Задания доступны до конца курса.</p>
             </div>
             <div class="feat reveal">
-                <div class="feat__ic">🎙️</div>
+                <div class="feat__ic" aria-hidden="true">
+                    <svg class="feat__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a3 3 0 013 3v5a3 3 0 01-6 0V7a3 3 0 013-3z"/><path d="M6.5 11.5A5.5 5.5 0 0012 17a5.5 5.5 0 005.5-5.5"/><path d="M12 17v3.5M9 20.5h6"/></svg>
+                </div>
                 <h3 class="feat__t">Научные встречи</h3>
                 <p class="feat__d">Вопросы и ответы с учителем — разбор сложных тем курса.</p>
             </div>
             <div class="feat reveal">
-                <div class="feat__ic">✅</div>
+                <div class="feat__ic" aria-hidden="true">
+                    <svg class="feat__svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.4 2.4 4.8-5.2"/></svg>
+                </div>
                 <h3 class="feat__t">Экзамен после книги</h3>
                 <p class="feat__d">Итоговая проверка знаний с автоматической проверкой результата.</p>
             </div>
@@ -269,7 +277,7 @@
 <section class="join" id="join">
     <div class="wrap center">
         <h2 class="join__title reveal">Начните учиться уже сегодня</h2>
-        <p class="join__lead reveal">Регистрация бесплатная. Запишитесь на открытый курс — и в первый же день получите доступ к урокам.</p>
+        <p class="join__lead reveal">Создайте аккаунт и запишитесь на открытый курс — в первый же день получите доступ к урокам.</p>
         <div class="hero__cta reveal">
             <a class="btn btn--primary btn--lg" href="{% url 'accounts:register' %}">Создать аккаунт</a>
             {% if site and site.whatsapp %}

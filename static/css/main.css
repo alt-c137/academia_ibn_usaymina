@@ -7,10 +7,11 @@
 /* --- Сброс и база --- */
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
     margin: 0;
+    overflow-x: hidden;   /* страховка: случайный широкий элемент не уедет вбок */
     font-family: var(--font-ui);
     font-size: 16.5px;
     line-height: 1.65;
@@ -251,16 +252,19 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
 .feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .feat {
     background: var(--surface); border: var(--border); border-radius: var(--radius);
-    padding: 24px 22px; box-shadow: var(--shadow-sm);
+    padding: 24px; box-shadow: var(--shadow-sm);
     transition: transform var(--tr), border-color var(--tr);
 }
 .feat:hover { transform: translateY(-4px); border-color: var(--gold); }
 .feat__ic {
-    font-size: 24px; margin-bottom: 12px;
+    margin-bottom: 12px;
     width: 52px; height: 52px; border-radius: 50%;
     display: grid; place-items: center;
-    background: var(--gold-soft);
+    background: var(--accent-soft); color: var(--accent);
+    transition: background var(--tr);
 }
+.feat:hover .feat__ic { background: var(--gold-soft); color: var(--gold); }
+.feat__svg { width: 26px; height: 26px; display: block; }
 .feat__t { font-size: 17px; margin-bottom: 6px; }
 .feat__d { color: var(--ink-soft); font-size: 14.5px; margin: 0; }
 
@@ -398,7 +402,7 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
 .meeting-list { display: grid; gap: 16px; margin-bottom: 30px; }
 .meeting-card {
     background: var(--surface); border: var(--border); border-radius: var(--radius);
-    padding: 22px 24px; box-shadow: var(--shadow-sm);
+    padding: 24px; box-shadow: var(--shadow-sm);
     border-left: 4px solid var(--gold);
 }
 .meeting-card.is-live { border-left-color: var(--success); }
@@ -466,7 +470,14 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
 .course-card:hover::before { opacity: 1; }
 .course-card:hover { text-decoration: none; transform: translateY(-4px); border-color: var(--gold); }
 .course-card__img { height: 160px; object-fit: cover; width: 100%; }
-.course-card__body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 8px; }
+.course-card__body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+/* Тихая звезда-орнамент в углу карточки курса — фирменный мотив */
+.course-card__body::after {
+    content: ""; position: absolute; right: 12px; bottom: 8px;
+    width: 58px; height: 58px;
+    background: url("../img/ornament-star.svg") center / contain no-repeat;
+    opacity: 0.12; pointer-events: none;
+}
 .course-card__t { font-size: 19px; margin: 0; }
 .course-card__b { color: var(--gold); font-size: 13.5px; margin: 0; }
 .course-card__d { color: var(--ink-soft); font-size: 14.5px; margin: 0; }
@@ -521,7 +532,7 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
 .exam-card { background: var(--surface); border: var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow-sm); }
 .exam-card__meta { list-style: none; padding: 0; margin: 10px 0 16px; display: flex; gap: 16px; flex-wrap: wrap; color: var(--ink-soft); font-size: 13.5px; }
 
-.exam-rules { background: var(--surface); border: var(--border); border-radius: var(--radius); padding: 22px 26px; margin: 20px 0; }
+.exam-rules { background: var(--surface); border: var(--border); border-radius: var(--radius); padding: 22px 24px; margin: 20px 0; box-shadow: var(--shadow-sm); }
 .exam-rules ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .exam-note { color: var(--ink-soft); font-size: 14px; }
 
@@ -573,7 +584,7 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
    ============================================================ */
 .card {
     background: var(--surface); border: var(--border); border-radius: var(--radius);
-    padding: 26px; box-shadow: var(--shadow-sm);
+    padding: 24px; box-shadow: var(--shadow-sm);
     display: grid; gap: 8px;
 }
 .card__title { font-size: 18px; }
@@ -613,7 +624,7 @@ textarea.input { resize: vertical; min-height: 140px; }
 .task-list__due { color: var(--gold); font-size: 13.5px; white-space: nowrap; }
 
 .office-courses { display: grid; gap: 16px; }
-.course-progress { background: var(--surface); border: var(--border); border-radius: var(--radius); padding: 20px 22px; }
+.course-progress { background: var(--surface); border: var(--border); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-sm); }
 .course-progress__head { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .course-progress__title { font-weight: 600; font-size: 17px; color: var(--ink); }
 .course-progress__meta { color: var(--ink-soft); font-size: 13.5px; margin: 8px 0 12px; }
@@ -632,7 +643,7 @@ textarea.input { resize: vertical; min-height: 140px; }
 /* ============================================================
    ВЫПИСКА (печать)
    ============================================================ */
-.transcript-card { background: var(--surface); border: var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 22px; }
+.transcript-card { background: var(--surface); border: var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 22px; box-shadow: var(--shadow-sm); }
 .transcript-card__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .transcript-card__t { font-size: 20px; margin: 0; }
 .transcript-card__actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
@@ -686,6 +697,7 @@ textarea.input { resize: vertical; min-height: 140px; }
     display: flex; flex-direction: column; gap: 4px; align-items: center;
     min-width: 200px; background: var(--surface); border: var(--border);
     border-radius: var(--radius); padding: 22px 26px; color: var(--ink);
+    box-shadow: var(--shadow-sm);
 }
 .contact-card:hover { text-decoration: none; border-color: var(--accent); }
 .contact-card__ic { font-size: 24px; }
@@ -872,7 +884,7 @@ textarea.input { resize: vertical; min-height: 140px; }
 .forum-post {
     display: flex; gap: 18px;
     background: var(--surface); border: var(--border); border-radius: var(--radius);
-    padding: 20px 22px; box-shadow: var(--shadow-sm);
+    padding: 22px 24px; box-shadow: var(--shadow-sm);
 }
 .forum-post.is-op { border-left: 4px solid var(--gold); }
 .forum-post__side { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 96px; text-align: center; }
@@ -928,11 +940,24 @@ textarea.input { resize: vertical; min-height: 140px; }
    АДАПТИВ
    ============================================================ */
 @media (max-width: 1400px) {
-    /* Компактнее меню, переключатель тем прячется — «Кабинет» всегда влезает
-       (замер: без этого страница шире экрана на ~56px при 1020–1366px) */
+    /* Диапазон 1321–1400: меню компактнее, переключатель тем спрятан */
     .nav { margin-left: 8px; gap: 0; }
     .nav__link { padding: 8px 9px; font-size: 14px; }
     .header__actions { gap: 8px; }
+    .theme-switch { display: none; }
+}
+
+/* 9 пунктов меню + лого + «Кабинет» реально влезают только шире ~1320px —
+   ниже включаем бургер (замер сплошной прокруткой ширин, см. main.css) */
+@media (max-width: 1320px) {
+    .nav {
+        display: none; position: absolute; top: 100%; left: 0; right: 0;
+        flex-direction: column; background: var(--surface);
+        border-bottom: var(--border); padding: 12px 22px 18px; margin: 0;
+        box-shadow: var(--shadow-sm);
+    }
+    .nav-open .nav { display: flex; }
+    .burger { display: flex; }
     .theme-switch { display: none; }
 }
 
@@ -944,19 +969,6 @@ textarea.input { resize: vertical; min-height: 140px; }
     .ring-card { grid-template-columns: 1fr; }
     .course-head { grid-template-columns: 1fr; }
     .exam-grid { grid-template-columns: 1fr; }
-    .nav { gap: 2px; }
-    .nav__link { padding: 8px 8px; font-size: 14px; }
-    /* Переключатель тем уходит первым — освобождаем место «Кабинету» */
-    .theme-switch { display: none; }
-    /* Меню — в выпадающую панель под шапкой (бургер) */
-    .nav {
-        display: none; position: absolute; top: 100%; left: 0; right: 0;
-        flex-direction: column; background: var(--surface);
-        border-bottom: var(--border); padding: 12px 22px 18px; margin: 0;
-        box-shadow: var(--shadow-sm);
-    }
-    .nav-open .nav { display: flex; }
-    .burger { display: flex; }
 }
 
 @media (max-width: 760px) {
