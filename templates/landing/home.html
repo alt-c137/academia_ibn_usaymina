@@ -185,7 +185,7 @@
         {% for program in programs %}
             {% if program.summary %}<p class="program-name reveal">{{ program.name }} · {{ program.summary }}</p>{% endif %}
             <div class="track">
-                {% for course in program.courses.all %}
+                {% for course in program.visible_courses %}
                     {% if course.is_published %}
                         <a class="tstop reveal {% if course.status == 'finished' %}is-done{% endif %}"
                            href="{% url 'courses:detail' course.slug %}">
@@ -334,7 +334,7 @@
             {% for item in feed %}
                 <article class="feed-card reveal">
                     <span class="badge feed-card__badge feed-card__badge--{{ item.kind }}">
-                        {% if item.kind == 'news' %}Новость{% elif item.kind == 'forum' %}Форум{% else %}Новый урок{% endif %}
+                        {% if item.kind == 'news' %}Новость{% elif item.kind == 'forum' %}Форум{% elif item.kind == 'meeting' %}Встреча{% else %}Новый урок{% endif %}
                     </span>
                     <div class="feed-card__body">
                         {% if item.kind == 'news' %}
@@ -345,6 +345,10 @@
                         {% elif item.kind == 'forum' %}
                             <h3 class="feed-card__t"><a href="{{ item.url }}">{{ item.title }}</a></h3>
                             <p class="feed-card__d">{{ item.board }} · автор: {{ item.author|default:"—" }} · ответов: {{ item.replies }}</p>
+                            <time class="feed-card__date" datetime="{{ item.date|date:'c' }}">{{ item.date|date:"d.m.Y H:i" }}</time>
+                        {% elif item.kind == 'meeting' %}
+                            <h3 class="feed-card__t"><a href="{{ item.url }}">{{ item.title }}</a></h3>
+                            <p class="feed-card__d">{% if item.course %}{{ item.course }} · {% endif %}онлайн-встреча{% if item.meta %} · {{ item.meta }}{% endif %}</p>
                             <time class="feed-card__date" datetime="{{ item.date|date:'c' }}">{{ item.date|date:"d.m.Y H:i" }}</time>
                         {% else %}
                             <h3 class="feed-card__t">{{ item.title }}</h3>

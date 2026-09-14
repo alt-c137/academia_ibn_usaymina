@@ -13,6 +13,7 @@
 @import url("themes/paper.css");
 @import url("themes/sand.css");
 @import url("themes/night.css");
+@import url("themes/rose.css");
 
 /* --- Шрифты (лежат локально в static/fonts, без интернета) --- */
 @font-face {

@@ -63,6 +63,14 @@ class SiteInfo(models.Model):
         "AdSense Client ID (ca-pub-…)", max_length=50, blank=True,
     )
 
+    # Тема по умолчанию для новых посетителей (каждый потом выбирает сам)
+    default_theme = models.CharField(
+        "Тема по умолчанию", max_length=10, blank=True,
+        choices=[("paper", "Классика"), ("sand", "Минимал"),
+                 ("night", "Ночь"), ("rose", "Роза (нежная)")],
+        help_text="Пусто — берётся из .env (SITE_THEME_DEFAULT)",
+    )
+
     # Форум: глобальный выключатель комментариев. Действует на все темы;
     # отдельно комментарии можно закрыть у конкретной темы (автором или
     # в админке через выбор тем).

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Уведомления — {{ site_title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow">Кабинет</p>
+        <h1 class="sec-title">Уведомления</h1>
+
+        {% if notifications %}
+            <form method="post" action="{% url 'accounts:notifications_read' %}" class="form-inline-mark">
+                {% csrf_token %}
+                <button class="btn btn--ghost btn--sm" type="submit">Отметить всё прочитанным</button>
+            </form>
+            <ul class="notif-list">
+                {% for n in notifications %}
+                    <li class="notif {% if not n.is_read %}is-unread{% endif %}">
+                        <div>
+                            {% if n.url %}<a href="{{ n.url }}">{{ n.title }}</a>{% else %}{{ n.title }}{% endif %}
+                            <time class="notif__time">{{ n.created_at|date:"d.m.Y H:i" }}</time>
+                        </div>
+                        {% if not n.is_read %}<span class="badge badge--registration">новое</span>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="sec-lead">Уведомлений пока нет. Когда учитель проверит вашу работу — здесь появится сообщение.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

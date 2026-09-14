@@ -77,11 +77,14 @@ class HomeView(TemplateView):
         return context
 
     def _build_feed(self):
-        """Единая лента: новости + темы форума + свежие уроки открытых курсов.
+        """Единая лента: новости + темы форума + уроки открытых курсов + встречи.
 
         Каждая запись: kind / title / url / date / meta. Сортировка по дате,
         пагинация по feed_page_size записей (аргумент ?page=).
         """
+        from django.utils import timezone
+
+        now = timezone.now()
         items = []
 
         if apps.is_installed("apps.news"):
@@ -137,6 +140,23 @@ class HomeView(TemplateView):
                     "date": lesson.created_at,
                     "course": lesson.course.title,
                     "week": lesson.week,
+                })
+
+        if apps.is_installed("apps.meetings"):
+            from apps.meetings.models import Meeting
+
+            # Встречи открыты всем — это витрина живой учёбы
+            for meeting in (
+                Meeting.objects.filter(is_published=True, starts_at__gte=now)
+                .select_related("course")[:6]
+            ):
+                items.append({
+                    "kind": "meeting",
+                    "title": meeting.title,
+                    "url": "/meetings/",
+                    "date": meeting.starts_at,
+                    "meta": meeting.starts_at.strftime("%d.%m %H:%M"),
+                    "course": meeting.course.title if meeting.course else "",
                 })
 
         items.sort(key=lambda i: i["date"], reverse=True)

@@ -56,11 +56,20 @@ class LoginForm(AuthenticationForm):
 
 
 class RegisterForm(UserCreationForm):
-    """Регистрация студента: e-mail + пароль + имя."""
+    """Регистрация студента: e-mail + пароль + имя + пол.
+
+    Пол обязателен: от него зависят доступы (женские/мужские курсы).
+    """
+
+    gender = forms.ChoiceField(
+        label="Пол (укажите правильно — от этого зависит доступ к курсам)",
+        choices=[("male", "Мужской"), ("female", "Женский")],
+        widget=forms.Select(attrs={"class": "input"}),
+    )
 
     class Meta:
         model = User
-        fields = ("first_name", "last_name", "email", "phone", "telegram")
+        fields = ("first_name", "last_name", "email", "phone", "telegram", "gender")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,7 +84,8 @@ class ProfileForm(UserChangeForm):
 
     class Meta:
         model = User
-        fields = ("avatar", "first_name", "last_name", "email", "phone", "telegram")
+        fields = ("avatar", "first_name", "last_name", "gender", "email",
+                  "phone", "telegram")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

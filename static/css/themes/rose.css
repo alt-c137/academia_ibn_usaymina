@@ -1,0 +1,64 @@
+/* ============================================================
+   ТЕМА «РОЗА» (rose) — нежная светлая, для женской части платформы
+   (таджвид, женские курсы). Выбирается в переключателе «Классика /
+   Минимал / Ночь / Роза»; женщинам ставится автоматически после
+   регистрации (можно сменить в любой момент).
+   ============================================================ */
+:root[data-theme="rose"] {
+    --bg: #FBF4F5;            /* тёплый светлый фарфор */
+    --bg-alt: #F5E9EC;
+    --surface: #FFFFFF;
+    --surface-2: #FDF8F9;
+    --ink: #33222A;
+    --ink-soft: #7A6470;
+
+    --accent: #A85570;        /* пыльная роза */
+    --accent-strong: #8A415A;
+    --accent-soft: #F6E3E9;
+    --on-accent: #FFF7F9;
+    --gold: #A97E50;          /* тёплое золото, дружит с розовым */
+    --gold-bright: #D3AC6E;
+    --gold-soft: #F3E9D8;
+    --line: #EAD8DE;
+
+    --danger: #A8402F;
+    --danger-soft: #F7E4E0;
+    --success: #4E6B33;
+    --success-soft: #E7EBD9;
+    --warning: #96530F;
+    --warning-soft: #FBE0B8;
+
+    --shadow: 0 14px 36px rgba(80, 40, 55, 0.12);
+    --shadow-sm: 0 6px 20px rgba(80, 40, 55, 0.09);
+    --shadow-card: 0 12px 32px rgba(80, 40, 55, 0.12);
+    --shadow-card-hover: 0 16px 40px rgba(80, 40, 55, 0.16);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --border: 1px solid var(--line);
+    --ornament-display: none;
+
+    /* Полоса — нежная роза, без тьмы */
+    --band-1: #EFD5DE;
+    --band-2: #E7C6D2;
+    --band-ink: #4A2434;
+    --band-soft: #7C4F60;
+    --band-line: rgba(74, 36, 52, 0.25);
+
+    --footer-bg: #F0DCE3;
+    --footer-ink: #7C4F60;
+    --footer-strong: #4A2434;
+
+    --font-title: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --title-weight: 700;
+    --title-tracking: -0.012em;
+}
+
+:root[data-theme="rose"] .hero {
+    border-bottom-color: var(--gold);
+}
+:root[data-theme="rose"] .hero .btn--primary {
+    color: #4A2434;
+}
+:root[data-theme="rose"] .site-footer {
+    border-top-color: var(--gold);
+}

@@ -88,6 +88,7 @@
                 <button class="theme-switch__btn" data-set-theme="paper" type="button">Классика</button>
                 <button class="theme-switch__btn" data-set-theme="sand" type="button">Минимал</button>
                 <button class="theme-switch__btn" data-set-theme="night" type="button">Ночь</button>
+                <button class="theme-switch__btn" data-set-theme="rose" type="button">Роза</button>
             </div>
 
             {% if user.is_authenticated %}
@@ -103,6 +104,10 @@
                         <span class="avatar avatar--xs avatar--empty" aria-hidden="true">{{ user.initials }}</span>
                     {% endif %}
                     <span class="office-link__label">Кабинет</span>
+                </a>
+                <a class="bell btn btn--ghost btn--sm" href="{% url 'accounts:notifications' %}" title="Уведомления">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+                    {% if unread_notifications %}<span class="badge badge--registration">{{ unread_notifications }}</span>{% endif %}
                 </a>
             {% else %}
                 <a class="btn btn--ghost btn--sm" href="{% url 'accounts:login' %}">Войти</a>

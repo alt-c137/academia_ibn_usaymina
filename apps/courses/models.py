@@ -52,6 +52,15 @@ class Course(TimeStampedModel):
     description = models.TextField("Подробное описание", blank=True)
     status = models.CharField("Статус", max_length=20, choices=Status.choices, default=Status.SOON)
     cover = models.ImageField("Обложка", upload_to="courses/covers/", blank=True)
+    class Audience(models.TextChoices):
+        ALL = "all", "Для всех"
+        MALE = "male", "Мужчины"
+        FEMALE = "female", "Женщины"
+
+    audience = models.CharField(
+        "Кому курс", max_length=8, choices=Audience.choices, default=Audience.ALL,
+        help_text="Женские курсы не видны мужчинам и наоборот",
+    )
     is_free = models.BooleanField(
         "Свободный доступ", default=False,
         help_text="Курс открыт без зачисления: любой зарегистрированный может "
@@ -97,6 +106,18 @@ class Course(TimeStampedModel):
         if not user.is_authenticated:
             return False
         return self.enrollments.filter(student=user).exists()
+
+    def visible_for(self, user) -> bool:
+        """Показывать ли курс этому посетителю (аудитория по полу).
+
+        Гость видит «Для всех» и оба раздела — пусть знает, что есть
+        женская и мужская части. Свои «чужие» курсы скрыты.
+        """
+        if not user.is_authenticated or not user.gender:
+            return True
+        if self.audience == self.Audience.ALL:
+            return True
+        return self.audience == user.gender
 
 
 class Lesson(TimeStampedModel):

@@ -50,7 +50,16 @@ def site_info(request):
     # чтобы не считать на каждом запросе)
     context["user_is_teacher"] = False
     context["teacher_pending"] = 0
+    context["unread_notifications"] = 0
     if request.user.is_authenticated:
+        # Непрочитанные уведомления — для колокола в шапке
+        if django_apps.is_installed("apps.accounts"):
+            from apps.accounts.models import Notification
+
+            context["unread_notifications"] = Notification.objects.filter(
+                user=request.user, is_read=False
+            ).count()
+
         try:
             from apps.teacher.permissions import is_teacher
 

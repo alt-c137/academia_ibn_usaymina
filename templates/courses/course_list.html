@@ -16,7 +16,7 @@
                 {% if program.summary %}<p class="program__summary">{{ program.summary }}</p>{% endif %}
 
                 <div class="course-grid">
-                    {% for course in program.courses.all %}
+                    {% for course in program.visible_courses %}
                         {% if course.is_published %}
                             <a class="course-card reveal" href="{% url 'courses:detail' course.slug %}">
                                 {% if course.cover %}
@@ -24,6 +24,7 @@
                                 {% endif %}
                                 <div class="course-card__body">
                                     <span class="badge badge--{{ course.status }}">{{ course.get_status_display }}</span>
+                                    {% if course.audience == 'female' %}<span class="badge course-card__aud">женский</span>{% elif course.audience == 'male' %}<span class="badge course-card__aud">мужской</span>{% endif %}
                                     <h3 class="course-card__t">{{ course.title }}</h3>
                                     {% if course.book %}
                                         <p class="course-card__b">{{ course.book }}{% if course.author %} · {{ course.author }}{% endif %}</p>

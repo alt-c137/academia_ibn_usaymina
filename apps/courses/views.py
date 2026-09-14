@@ -17,16 +17,28 @@ from apps.courses.models import Course, Enrollment, Lesson, LessonProgress, Prog
 
 
 class CourseListView(ListView):
-    """Каталог: программы с их курсами и статусами (как трек книг на hdat.sa)."""
+    """Каталог: программы с их курсами и статусами (как трек книг на hdat.sa).
+
+    Курс виден, если его аудитория совпадает с полом посетителя
+    (гостям показываем всё — пусть видят структуру платформы).
+    """
+
     template_name = "courses/course_list.html"
     context_object_name = "programs"
 
     def get_queryset(self):
-        return (
+        programs = (
             Program.objects.filter(is_published=True)
             .prefetch_related("courses")
             .order_by("order", "pk")
         )
+        user = self.request.user
+        for program in programs:
+            program.visible_courses = [
+                c for c in program.courses.all()
+                if c.is_published and c.visible_for(user)
+            ]
+        return programs
 
 
 class CourseDetailView(DetailView):
@@ -34,6 +46,12 @@ class CourseDetailView(DetailView):
     context_object_name = "course"
     model = Course
     slug_field = "slug"
+
+    def dispatch(self, request, *args, **kwargs):
+        course = self.get_object()
+        if not course.visible_for(request.user):
+            raise Http404("Курс недоступен этому профилю.")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return Course.objects.filter(is_published=True).select_related("program")
@@ -74,6 +92,8 @@ class LessonDetailView(LoginRequiredMixin, DetailView):
         self.course = get_object_or_404(
             Course, slug=kwargs["course_slug"], is_published=True
         )
+        if not self.course.visible_for(request.user):
+            raise Http404("Урок недоступен этому профилю.")
         return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
@@ -113,6 +133,14 @@ def enroll_view(request, slug: str):
         return redirect("accounts:login")
 
     course = get_object_or_404(Course, slug=slug, is_published=True)
+
+    # Аудитория: на чужой по полу курс записаться нельзя
+    if not course.visible_for(request.user):
+        messages.error(
+            request,
+            "Этот курс для другой аудитории — он не виден вашему профилю."
+        )
+        return redirect("courses:list")
 
     if course.is_free:
         _, created = Enrollment.objects.get_or_create(

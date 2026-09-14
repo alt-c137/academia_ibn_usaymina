@@ -54,6 +54,12 @@ class User(AbstractUser):
         validators=[FileValidator(IMAGE_TYPES, max_size_mb=2)],
         help_text="Квадратная картинка до 2 МБ (jpg, png, webp)",
     )
+    gender = models.CharField(
+        "Пол", max_length=6,
+        choices=[("male", "Мужской"), ("female", "Женский")],
+        blank=True,
+        help_text="Важно: определяет доступ к разделам (женские/мужские курсы)",
+    )
 
     # Блокировка (бан): админ указывает срок и причину. Заблокированный
     # может входить и учиться, но не может публиковать на форуме.
@@ -87,6 +93,27 @@ class User(AbstractUser):
         from django.utils import timezone
 
         return bool(self.banned_until and self.banned_until > timezone.now())
+
+
+class Notification(models.Model):
+    """Уведомление пользователю: проверили задание, ответ учителя и т.п."""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="notifications",
+        verbose_name="Кому",
+    )
+    title = models.CharField("Текст", max_length=250)
+    url = models.CharField("Куда перейти", max_length=300, blank=True)
+    is_read = models.BooleanField("Прочитано", default=False)
+    created_at = models.DateTimeField("Когда", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Уведомление"
+        verbose_name_plural = "Уведомления"
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"{self.user}: {self.title}"
 
     USERNAME_FIELD = "email"  # чем пользователь логинится
     REQUIRED_FIELDS = []     # при createsuperuser спрашиваем только e-mail и пароль

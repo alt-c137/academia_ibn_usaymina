@@ -24,6 +24,8 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("profile/", views.ProfileView.as_view(), name="profile"),
+    path("notifications/", views.NotificationsView.as_view(), name="notifications"),
+    path("notifications/read/", views.notifications_read_view, name="notifications_read"),
     # --- смена пароля (для вошедших) ---
     path(
         "password-change/",

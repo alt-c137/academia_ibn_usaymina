@@ -20,6 +20,16 @@ from apps.teacher.forms import GradeAnswerForm, GradeSubmissionForm
 from apps.teacher.permissions import TeacherRequiredMixin
 
 
+def notify(user, title: str, url: str = "") -> None:
+    """Уведомление студенту (тихо игнорируем сбои — не критичный путь)."""
+    try:
+        from apps.accounts.models import Notification
+
+        Notification.objects.create(user=user, title=title, url=url)
+    except Exception:
+        pass
+
+
 class DashboardView(TeacherRequiredMixin, TemplateView):
     template_name = "teacher/dashboard.html"
 
@@ -90,6 +100,14 @@ class SubmissionDetailView(TeacherRequiredMixin, DetailView):
                 submission.graded_by = request.user
                 submission.graded_at = timezone.now()
             submission.save()
+            notify(
+                submission.student,
+                f"Задание проверено: «{submission.assignment.title}»"
+                + (f" — {submission.score}/{submission.assignment.max_points} баллов"
+                   if submission.score is not None else
+                   " — учитель оставил комментарий"),
+                f"/assignments/{submission.assignment_id}/",
+            )
             messages.success(
                 request,
                 "Оценка сохранена." if submission.score is not None else "Комментарий сохранён.",
@@ -151,6 +169,11 @@ class AttemptDetailView(TeacherRequiredMixin, DetailView):
                 answer,
                 points=form.cleaned_data["points"],
                 feedback=form.cleaned_data["feedback"],
+            )
+            notify(
+                attempt.student,
+                f"Экзамен проверен: «{attempt.exam.title}» — {attempt.score_percent}%",
+                f"/exams/result/{attempt.pk}/",
             )
             messages.success(request, "Ответ оценён.")
             # Все открытые ответы проверены — итог попытки пересчитан
