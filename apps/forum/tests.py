@@ -23,6 +23,9 @@ def _thread_post_data(title="Вопрос о таубе", body="Как выпо�
 
 class ForumModerationTests(TestCase):
     def setUp(self):
+        from django.core.cache import cache
+
+        cache.clear()  # настройки сайта кэшируются — начинаем с чистого листа
         self.board = Board.objects.create(name="Вопросы", slug="voprosy")
         self.student = _user("s1@t.t", first_name="Студент")
         self.teacher = _user("t1@t.t", first_name="Учитель", is_staff=True)
@@ -97,6 +100,9 @@ class ForumSettingsTests(TestCase):
     """Приватные вопросы, кто отвечает, комментарии, официальный ответ."""
 
     def setUp(self):
+        from django.core.cache import cache
+
+        cache.clear()
         self.board = Board.objects.create(name="Вопросы", slug="voprosy")
         self.student = _user("s2@t.t", first_name="Студент")
         self.trusted = _user("trust@t.t", first_name="Доверенный", is_trusted=True)
@@ -171,6 +177,21 @@ class ForumSettingsTests(TestCase):
         Thread.objects.filter(pk__in=[t1.pk, t2.pk]).update(allow_comments=False)
         t1.refresh_from_db()
         self.assertFalse(t1.allow_comments)
+
+    def test_forum_moderator_group_can_moderate(self):
+        """Участник группы «Модератор форума» (не учитель) модераторит."""
+        mod = _user("fmod@t.t", first_name="Форум-мод")
+        from django.contrib.auth.models import Group
+
+        mod.groups.add(Group.objects.get(name="Модератор форума"))
+        thread = self._thread(is_approved=False)
+        self.client.login(email="fmod@t.t", password="pass12345")
+        # видит очередь и одобряет
+        response = self.client.get("/forum/moderation/")
+        self.assertEqual(response.status_code, 200)
+        self.client.post(f"/forum/t/{thread.pk}/moderate/", {"action": "approve"})
+        thread.refresh_from_db()
+        self.assertTrue(thread.is_approved)
 
     def test_teacher_marks_official_answer(self):
         thread = self._thread()

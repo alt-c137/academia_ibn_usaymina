@@ -33,6 +33,8 @@
 
     --shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
     --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);           /* на тёмном тень темнее фона */
+    --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.6);
     --radius: 16px;
     --radius-sm: 10px;
     --border: 1px solid var(--line);
@@ -59,6 +61,10 @@
 :root[data-theme="night"] .site-header {
     background: color-mix(in srgb, var(--bg) 86%, transparent);
 }
+/* Без светлых рамок карточки в ночи сливаются — возвращаем контур */
+:root[data-theme="night"] .card,
+:root[data-theme="night"] .feat,
+:root[data-theme="night"] .course-card { border: var(--border); }
 :root[data-theme="night"] .btn--primary {
     background: linear-gradient(180deg, var(--gold-bright), var(--gold));
     color: var(--on-accent);

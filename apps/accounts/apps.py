@@ -14,18 +14,22 @@ class AccountsConfig(AppConfig):
 
 
 def ensure_teacher_group(sender, **kwargs):
-    """Создаёт группу «Учитель» и выдаёт ей права на модули контента.
+    """Создаёт служебные группы и выдаёт права. Запускается после migrate.
 
-    Учитель может добавлять уроки/тесты/задания и проверять ответы,
-    но не управляет пользователями и настройками сайта.
-    Запускается автоматически после каждой команды migrate.
+    Группы и их возможности (назначаются в админке → Пользователи → Группы):
+      «Учитель»             — весь учебный контент: курсы/уроки, экзамены,
+                              задания, оценки, библиотека, новости, книги;
+                              плюс учительская /teacher/ (проверка работ).
+      «Модератор форума»    — темы и ответы форума: одобрение, правка,
+                              закрепление, удаление; очередь /forum/moderation/.
+      «Редактор новостей»   — новости и FAQ: публикация и правка.
+    Суперпользователь и так всё может; is_staff даёт админку.
     """
     from django.contrib.auth.models import Group, Permission
 
-    CONTENT_APPS = ("courses", "exams", "assignments", "grading", "library",
-                    "news", "books", "payments", "forum")
     group, _ = Group.objects.get_or_create(name="Учитель")
-
+    CONTENT_APPS = ("courses", "exams", "assignments", "grading", "library",
+                    "news", "books", "payments", "forum", "hadith")
     perms = Permission.objects.filter(content_type__app_label__in=CONTENT_APPS).exclude(
         content_type__app_label="auth"
     )
@@ -34,3 +38,15 @@ def ensure_teacher_group(sender, **kwargs):
         content_type__app_label="accounts", codename__startswith="view"
     )
     group.permissions.set(perms)
+
+    # «Модератор форума» — только темы/ответы форума
+    forum_group, _ = Group.objects.get_or_create(name="Модератор форума")
+    forum_group.permissions.set(
+        Permission.objects.filter(content_type__app_label="forum")
+    )
+
+    # «Редактор новостей» — новости и FAQ
+    news_group, _ = Group.objects.get_or_create(name="Редактор новостей")
+    news_group.permissions.set(
+        Permission.objects.filter(content_type__app_label="news")
+    )

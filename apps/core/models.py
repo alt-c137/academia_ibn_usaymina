@@ -46,6 +46,23 @@ class SiteInfo(models.Model):
         "Показывать раздел книг в меню и на главной", default=True,
     )
 
+    # --- Глобальные включатели разделов (пункты меню + доступ по адресу) ---
+    forum_enabled = models.BooleanField("Раздел «Форум» включён", default=True)
+    hadith_enabled = models.BooleanField("Раздел «Хадисы» включён", default=True)
+    library_enabled = models.BooleanField("Раздел «Библиотека» включён", default=True)
+    stories_enabled = models.BooleanField(
+        "Раздел «Истории» (заготовка на будущее)", default=False,
+    )
+    secular_courses_enabled = models.BooleanField(
+        "Светские курсы (заготовка на будущее)", default=False,
+    )
+
+    # --- Google AdSense: один чекбокс и ID, без правок кода ---
+    adsense_enabled = models.BooleanField("Показывать Google AdSense", default=False)
+    adsense_client_id = models.CharField(
+        "AdSense Client ID (ca-pub-…)", max_length=50, blank=True,
+    )
+
     # Форум: глобальный выключатель комментариев. Действует на все темы;
     # отдельно комментарии можно закрыть у конкретной темы (автором или
     # в админке через выбор тем).

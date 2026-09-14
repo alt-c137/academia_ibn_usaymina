@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load ads_extras %}
 
 {% block title %}{{ site_title }} — системное изучение шариатских наук{% endblock %}
 {% block description %}Дистанционное обучение по книгам с сопровождением: уроки, еженедельные задания, научные встречи и экзамены с проверкой знаний.{% endblock %}
@@ -34,6 +35,97 @@
         </div>
     </div>
 </section>
+
+{# ─────────────────── Хаб разделов ─────────────────── #}
+<section class="section section--tight">
+    <div class="wrap">
+        <div class="hub-grid reveal">
+            <a class="hub-card" href="{% url 'courses:list' %}">
+                <svg class="hub-card__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5v13z"/><path d="M4 19.5A2.5 2.5 0 006.5 22H20v-5"/></svg>
+                <span class="hub-card__t">Курсы</span>
+                <span class="hub-card__d">Программы и уроки</span>
+            </a>
+            {% if has_library %}
+                <a class="hub-card" href="{% url 'library:index' %}">
+                    <svg class="hub-card__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/><path d="M3 20h18"/></svg>
+                    <span class="hub-card__t">Библиотека</span>
+                    <span class="hub-card__d">PDF, аудио и видео</span>
+                </a>
+            {% endif %}
+            {% if has_hadith %}
+                <a class="hub-card" href="{% url 'hadith:list' %}">
+                    <svg class="hub-card__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.4l-4.8 2.5.9-5.4-3.9-3.8 5.4-.8L12 3z"/></svg>
+                    <span class="hub-card__t">Хадисы</span>
+                    <span class="hub-card__d">Изучение Сунны</span>
+                </a>
+            {% endif %}
+            {% if has_meetings %}
+                <a class="hub-card" href="{% url 'meetings:list' %}">
+                    <svg class="hub-card__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/></svg>
+                    <span class="hub-card__t">Встречи</span>
+                    <span class="hub-card__d">Прямые эфиры с учителем</span>
+                </a>
+            {% endif %}
+            {% if has_forum %}
+                <a class="hub-card" href="{% url 'forum:home' %}">
+                    <svg class="hub-card__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg>
+                    <span class="hub-card__t">Форум</span>
+                    <span class="hub-card__d">Вопросы и статьи</span>
+                </a>
+            {% endif %}
+            {% if has_news %}
+                <a class="hub-card" href="{% url 'news:list' %}">
+                    <svg class="hub-card__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14H6a2 2 0 01-2-2V5z"/><path d="M17 8h3v9a2 2 0 01-2 2h-1"/><path d="M7 9h7M7 12h7M7 15h4"/></svg>
+                    <span class="hub-card__t">Новости</span>
+                    <span class="hub-card__d">Что нового</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{# ─────────────────── Ваш кабинет (для вошедших) ─────────────────── #}
+{% if user.is_authenticated %}
+<section class="section section--tight">
+    <div class="wrap">
+        <div class="cabinet-card reveal">
+            {% if user.avatar %}
+                <img class="avatar avatar--lg" src="{{ user.avatar.url }}" alt="">
+            {% else %}
+                <span class="avatar avatar--lg avatar--empty">{{ user.initials }}</span>
+            {% endif %}
+            <div class="cabinet-card__body">
+                <p class="cabinet-card__hello">Ваш кабинет</p>
+                <p class="cabinet-card__name">{{ user.first_name }} {{ user.last_name }}</p>
+                <p class="cabinet-card__meta">
+                    {% if cabinet_active_courses %}Активных курсов: <strong>{{ cabinet_active_courses }}</strong>{% else %}Вы пока не записаны на курсы{% endif %}
+                </p>
+            </div>
+            <div class="cabinet-card__actions">
+                <a class="btn btn--primary btn--sm" href="{% url 'grading:office' %}">Мои курсы</a>
+                <a class="btn btn--ghost btn--sm" href="{% url 'accounts:profile' %}">Мой профиль</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# ─────────────────── Хадис дня ─────────────────── #}
+{% if hadith_of_the_day %}
+<section class="section section--tight">
+    <div class="wrap wrap--narrow">
+        <div class="hadith-day reveal">
+            <p class="hadith-day__label">Хадис дня</p>
+            <p class="hadith-day__text">{{ hadith_of_the_day.text }}</p>
+            <p class="hadith-day__meta">
+                {% if hadith_of_the_day.narrator %}Передал: {{ hadith_of_the_day.narrator }}. {% endif %}
+                {% if hadith_of_the_day.source %}{{ hadith_of_the_day.source }}{% endif %}
+            </p>
+        </div>
+        <p class="center"><a class="btn btn--ghost btn--sm" href="{% url 'hadith:list' %}">Все хадисы</a></p>
+    </div>
+</section>
+{% endif %}
 
 {# ─────────────────── Идея программы ─────────────────── #}
 <section class="section section--mist" id="idea">
@@ -232,24 +324,54 @@
 </section>
 {% endif %}
 
-{# ─────────────────── Новости ─────────────────── #}
-{% if latest_posts %}
-<section class="section" id="news">
+{# ─────────────────── Лента: новости + форум + уроки ─────────────────── #}
+{% if feed %}
+<section class="section" id="feed">
     <div class="wrap">
-        <p class="eyebrow reveal">Новости</p>
-        <h2 class="sec-title reveal">Последнее на платформе</h2>
-        <div class="post-grid">
-            {% for post in latest_posts %}
-                <a class="post-card reveal" href="{{ post.get_absolute_url }}">
-                    {% if post.cover %}<img class="post-card__img" src="{{ post.cover.url }}" alt="">{% endif %}
-                    <div class="post-card__body">
-                        <time class="post-card__date" datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"d.m.Y" }}</time>
-                        <h3 class="post-card__t">{{ post.title }}</h3>
-                        <p class="post-card__d">{{ post.excerpt|default:post.body|truncatewords:16 }}</p>
+        <p class="eyebrow reveal">Живая лента</p>
+        <h2 class="sec-title reveal">Новости, обсуждения и новые уроки</h2>
+        <div class="feed-list">
+            {% for item in feed %}
+                <article class="feed-card reveal">
+                    <span class="badge feed-card__badge feed-card__badge--{{ item.kind }}">
+                        {% if item.kind == 'news' %}Новость{% elif item.kind == 'forum' %}Форум{% else %}Новый урок{% endif %}
+                    </span>
+                    <div class="feed-card__body">
+                        {% if item.kind == 'news' %}
+                            {% if item.cover %}<img class="feed-card__cover" src="{{ item.cover.url }}" alt="">{% endif %}
+                            <h3 class="feed-card__t">{% if item.url %}<a href="{{ item.url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}</h3>
+                            {% if item.excerpt %}<p class="feed-card__d">{{ item.excerpt|truncatewords:22 }}</p>{% endif %}
+                            <time class="feed-card__date" datetime="{{ item.date|date:'c' }}">{{ item.date|date:"d.m.Y" }}</time>
+                        {% elif item.kind == 'forum' %}
+                            <h3 class="feed-card__t"><a href="{{ item.url }}">{{ item.title }}</a></h3>
+                            <p class="feed-card__d">{{ item.board }} · автор: {{ item.author|default:"—" }} · ответов: {{ item.replies }}</p>
+                            <time class="feed-card__date" datetime="{{ item.date|date:'c' }}">{{ item.date|date:"d.m.Y H:i" }}</time>
+                        {% else %}
+                            <h3 class="feed-card__t">{{ item.title }}</h3>
+                            <p class="feed-card__d">Курс «{{ item.course }}» · неделя {{ item.week }}</p>
+                            <time class="feed-card__date" datetime="{{ item.date|date:'c' }}">{{ item.date|date:"d.m.Y" }}</time>
+                            {% if item.alt_url %}<a class="feed-card__go" href="{{ item.alt_url }}">К курсу →</a>{% endif %}
+                        {% endif %}
                     </div>
-                </a>
+                </article>
+                {% if forloop.counter0 > 0 and forloop.counter0|divisibleby:3 and not forloop.last %}
+                    {% show_ad "between_posts" %}
+                {% endif %}
             {% endfor %}
         </div>
+
+        {# Пагинация ленты #}
+        {% if feed.has_other_pages %}
+            <nav class="pagination">
+                {% if feed.has_previous %}
+                    <a href="?page={{ feed.previous_page_number }}#feed">← Новее</a>
+                {% endif %}
+                <span>Страница {{ feed.number }} из {{ feed.paginator.num_pages }}</span>
+                {% if feed.has_next %}
+                    <a href="?page={{ feed.next_page_number }}#feed">Показать ещё →</a>
+                {% endif %}
+            </nav>
+        {% endif %}
     </div>
 </section>
 {% endif %}

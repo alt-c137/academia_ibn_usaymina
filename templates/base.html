@@ -4,6 +4,7 @@
 блоки title / content (+ при необходимости extra_css / extra_js).
 {% endcomment %}
 {% load static %}
+{% load ads_extras %}
 <!DOCTYPE html>
 <html lang="ru" data-theme="{{ request.theme|default:'paper' }}">
 <head>
@@ -14,6 +15,10 @@
     <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
     <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% if site_settings and site_settings.adsense_enabled and site_settings.adsense_client_id %}
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site_settings.adsense_client_id }}"
+                crossorigin="anonymous"></script>
+    {% endif %}
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -43,6 +48,12 @@
                    href="{% url 'forum:home' %}">Форум</a>
             {% endif %}
 
+            {% if has_hadith %}
+                <div class="nav__more">
+                    <a class="nav__link {% if request.resolver_match.app_name == 'hadith' %}is-active{% endif %}"
+                       href="{% url 'hadith:list' %}">Хадисы</a>
+                </div>
+            {% endif %}
             {# Второстепенные разделы — под одной кнопкой «Ещё» (на телефоне раскрываются списком) #}
             <div class="nav__more">
                 <button class="nav__link nav__more-btn" type="button" aria-haspopup="true">
@@ -105,6 +116,8 @@
     </div>
 </header>
 
+{% show_ad "header" %}
+
 {% include "includes/messages.html" %}
 
 <main class="site-main">
@@ -146,6 +159,7 @@
             {% endif %}
         </div>
     </div>
+    {% show_ad "footer" %}
     {% if site and site.show_donations and site.donations_details %}
         <div class="wrap donate">
             <div class="donate__text">

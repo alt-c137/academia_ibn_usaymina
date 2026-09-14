@@ -32,6 +32,8 @@
 
     --shadow: none;           /* минимализм: без теней, тонкие рамки */
     --shadow-sm: none;
+    --shadow-card: none;      /* карточки тоже плоские — рамки ниже */
+    --shadow-card-hover: none;
     --radius: 2px;
     --radius-sm: 2px;
     --border: 1px solid var(--line);
@@ -53,3 +55,10 @@
     --title-tracking: -0.028em;
     --font-title: var(--font-ui); /* рубленый шрифт заголовков */
 }
+
+/* В минимале карточки без теней — возвращаем им тонкую рамку */
+:root[data-theme="sand"] .card,
+:root[data-theme="sand"] .feat,
+:root[data-theme="sand"] .course-card { border: var(--border); }
+:root[data-theme="sand"] .feat:hover,
+:root[data-theme="sand"] .course-card:hover { transform: none; }

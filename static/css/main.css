@@ -277,11 +277,14 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
    ============================================================ */
 .feat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .feat {
-    background: var(--surface); border: var(--border); border-radius: var(--radius);
-    padding: 24px; box-shadow: var(--shadow-sm);
-    transition: transform var(--tr), border-color var(--tr);
+    background: var(--surface); border-radius: var(--radius);
+    padding: 24px; box-shadow: var(--shadow-card, 0 12px 32px rgba(28, 36, 26, 0.14));
+    transition: transform var(--tr), box-shadow var(--tr);
 }
-.feat:hover { transform: translateY(-4px); border-color: var(--gold); }
+.feat:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover, 0 16px 40px rgba(28, 36, 26, 0.18));
+}
 .feat__ic {
     margin-bottom: 12px;
     width: 52px; height: 52px; border-radius: 50%;
@@ -484,9 +487,10 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
 .course-card {
     position: relative;
     display: flex; flex-direction: column;
-    background: var(--surface); border: var(--border); border-radius: var(--radius);
-    overflow: hidden; color: var(--ink); box-shadow: var(--shadow-sm);
-    transition: transform var(--tr), border-color var(--tr);
+    background: var(--surface); border-radius: var(--radius);
+    overflow: hidden; color: var(--ink);
+    box-shadow: var(--shadow-card, 0 12px 32px rgba(28, 36, 26, 0.14));
+    transition: transform var(--tr), box-shadow var(--tr);
 }
 .course-card::before {
     content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
@@ -494,15 +498,22 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
     opacity: 0; transition: opacity var(--tr); z-index: 1;
 }
 .course-card:hover::before { opacity: 1; }
-.course-card:hover { text-decoration: none; transform: translateY(-4px); border-color: var(--gold); }
+.course-card:hover {
+    text-decoration: none; transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover, 0 16px 40px rgba(28, 36, 26, 0.18));
+}
 .course-card__img { height: 160px; object-fit: cover; width: 100%; }
 .course-card__body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 8px; position: relative; }
-/* Тихая звезда-орнамент в углу карточки курса — фирменный мотив */
+.course-card__body .badge { align-self: flex-start; }
+/* Тихая звезда-орнамент в углу карточки курса — золотая через mask,
+   чтобы цвет управлялся темой */
 .course-card__body::after {
     content: ""; position: absolute; right: 12px; bottom: 8px;
     width: 58px; height: 58px;
-    background: url("../img/ornament-star.svg") center / contain no-repeat;
-    opacity: 0.12; pointer-events: none;
+    background-color: var(--gold);
+    -webkit-mask: url("../img/ornament-star.svg") center / contain no-repeat;
+    mask: url("../img/ornament-star.svg") center / contain no-repeat;
+    opacity: 0.15; pointer-events: none;
 }
 .course-card__t { font-size: 19px; margin: 0; }
 .course-card__b { color: var(--gold); font-size: 13.5px; margin: 0; }
@@ -609,8 +620,8 @@ h1, h2, h3, h4 { font-family: var(--font-title); font-weight: var(--title-weight
    ФОРМЫ
    ============================================================ */
 .card {
-    background: var(--surface); border: var(--border); border-radius: var(--radius);
-    padding: 24px; box-shadow: var(--shadow-sm);
+    background: var(--surface); border-radius: var(--radius);
+    padding: 24px; box-shadow: var(--shadow-card, 0 12px 32px rgba(28, 36, 26, 0.14));
     display: grid; gap: 8px;
 }
 .card__title { font-size: 18px; }
@@ -956,6 +967,117 @@ textarea.input { resize: vertical; min-height: 140px; }
 .donate__d { margin: 0; font-size: 13.5px; opacity: 0.85; }
 .donate__details { font-size: 13.5px; text-align: right; color: var(--footer-strong); }
 .donate__details strong { display: block; font-size: 15px; }
+
+/* Хадисы: карточка дня и список */
+.hadith-day {
+    background: linear-gradient(140deg, var(--band-1), var(--band-2));
+    color: var(--band-ink);
+    border-radius: var(--radius);
+    border-top: 3px solid var(--gold);
+    padding: 30px 34px; margin: 0 0 30px;
+}
+.hadith-day__label {
+    font: 700 11.5px var(--font-ui); letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gold-bright); margin: 0 0 10px;
+}
+.hadith-day__text {
+    font-family: var(--font-title); font-size: 21px; line-height: 1.55;
+    margin: 0 0 12px; color: var(--band-ink);
+}
+.hadith-day__meta { color: var(--band-soft); font-size: 13.5px; margin: 0; }
+.hadith-list { display: grid; gap: 14px; }
+.hadith-card {
+    background: var(--surface); border: var(--border); border-radius: var(--radius);
+    border-left: 4px solid var(--gold);
+    padding: 20px 24px; box-shadow: var(--shadow-sm);
+}
+.hadith-card__text { font-size: 16.5px; margin: 0 0 8px; }
+.hadith-card__meta { color: var(--ink-soft); font-size: 13px; margin: 0; }
+
+/* Рекламные баннеры (свои креативы) */
+.ad-banner {
+    max-width: var(--wrap); margin: 0 auto; padding: 0 22px 18px;
+}
+.ad-banner__label {
+    display: inline-block; font: 600 11px var(--font-ui); letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-soft); margin-bottom: 6px;
+}
+.ad-banner__media {
+    display: block; width: 100%; max-height: 220px; object-fit: cover;
+    border-radius: var(--radius); border: var(--border);
+}
+
+/* ============================================================
+   ХАБ РАЗДЕЛОВ, КАБИНЕТ-КАРТОЧКА И ЛЕНТА НА ГЛАВНОЙ
+   ============================================================ */
+.section--tight { padding: 40px 0; }
+.hub-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+.hub-card {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    text-align: center; padding: 20px 12px 16px;
+    background: var(--surface); border-radius: var(--radius);
+    color: var(--ink); box-shadow: var(--shadow-card, var(--shadow-sm));
+    transition: transform var(--tr), box-shadow var(--tr);
+}
+.hub-card:hover {
+    text-decoration: none; transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover, var(--shadow));
+}
+.hub-card__ic {
+    width: 40px; height: 40px; padding: 9px; margin-bottom: 6px;
+    border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+}
+.hub-card__t { font-weight: 700; font-size: 14.5px; }
+.hub-card__d { color: var(--ink-soft); font-size: 12px; }
+
+/* Карточка «Ваш кабинет» */
+.cabinet-card {
+    display: flex; gap: 22px; align-items: center; flex-wrap: wrap;
+    background: var(--surface); border-radius: var(--radius);
+    border-top: 3px solid var(--gold);
+    padding: 24px 28px; box-shadow: var(--shadow-card, var(--shadow-sm));
+}
+.cabinet-card__body { flex: 1; min-width: 220px; }
+.cabinet-card__hello {
+    font: 700 11.5px var(--font-ui); letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gold); margin: 0 0 4px;
+}
+.cabinet-card__name { font: 700 22px var(--font-title); margin: 0 0 4px; }
+.cabinet-card__meta { color: var(--ink-soft); font-size: 14.5px; margin: 0; }
+.cabinet-card__meta strong { color: var(--accent); }
+.cabinet-card__actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Лента: единая карточка новости/темы/урока */
+.feed-list { display: grid; gap: 16px; margin-top: 8px; }
+.feed-card {
+    display: flex; gap: 18px; align-items: flex-start;
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px 22px; box-shadow: var(--shadow-card, var(--shadow-sm));
+}
+.feed-card__badge { flex: none; align-self: flex-start; }
+.feed-card__badge--news { background: var(--gold-soft); color: var(--gold); }
+.feed-card__badge--forum { background: var(--accent-soft); color: var(--accent); }
+.feed-card__badge--lesson { background: var(--success-soft); color: var(--success); }
+.feed-card__body { min-width: 0; flex: 1; }
+.feed-card__t { font-size: 17.5px; margin: 0 0 4px; }
+.feed-card__t a { color: var(--ink); }
+.feed-card__t a:hover { color: var(--accent); }
+.feed-card__d { color: var(--ink-soft); font-size: 14px; margin: 0 0 6px; }
+.feed-card__cover {
+    float: right; width: 110px; height: 74px; object-fit: cover;
+    border-radius: var(--radius-sm); margin: 0 0 8px 14px;
+}
+.feed-card__date { color: var(--ink-soft); font-size: 12.5px; }
+.feed-card__go { color: var(--accent); font-weight: 600; font-size: 13.5px; margin-left: 10px; }
+.feed-card + .ad-banner { margin-top: -2px; padding-top: 0; }
+.feed-card + .ad-banner .ad-banner__media { max-height: 160px; }
+
+@media (max-width: 1020px) { .hub-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px) {
+    .hub-grid { grid-template-columns: repeat(2, 1fr); }
+    .feed-card { flex-direction: column; gap: 8px; }
+    .feed-card__cover { float: none; width: 100%; height: 140px; margin: 0 0 8px; }
+}
 
 /* ============================================================
    АНИМАЦИИ ПОЯВЛЕНИЯ (reveal)

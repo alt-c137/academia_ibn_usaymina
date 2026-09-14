@@ -1,12 +1,22 @@
 """Страницы библиотеки: список категорий, категория, редирект материала."""
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView
 
+from apps.core.sections import require_section
 from apps.library.models import Category, Item
 
 
 class LibraryView(ListView):
     """Главный экран библиотеки: категории + последние материалы."""
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            require_section("library_enabled")
+        except Http404:
+            raise Http404("Библиотека сейчас отключена.")
+        return super().dispatch(request, *args, **kwargs)
+
     template_name = "library/library.html"
     context_object_name = "categories"
 
@@ -23,6 +33,14 @@ class LibraryView(ListView):
 
 class CategoryView(ListView):
     """Материалы одной категории."""
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            require_section("library_enabled")
+        except Http404:
+            raise Http404("Библиотека сейчас отключена.")
+        return super().dispatch(request, *args, **kwargs)
+
     template_name = "library/category.html"
     context_object_name = "items"
 

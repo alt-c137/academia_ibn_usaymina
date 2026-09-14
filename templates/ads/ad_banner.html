@@ -1,0 +1,15 @@
+{% comment %}Один рекламный креатив: картинка / видео / аудио. Пусто — не выводим ничего.{% endcomment %}
+{% if creative %}
+    <aside class="ad-banner">
+        {% if creative.advertiser_name %}<span class="ad-banner__label">{{ creative.advertiser_name }}</span>{% endif %}
+        {% if creative.image %}
+            {% if creative.link_url %}<a href="{{ creative.link_url }}" target="_blank" rel="noopener nofollow">{% endif %}
+            <img class="ad-banner__media" src="{{ creative.image.url }}" alt="{{ creative.advertiser_name|default:'Реклама' }}">
+            {% if creative.link_url %}</a>{% endif %}
+        {% elif creative.video %}
+            <video class="ad-banner__media" src="{{ creative.video.url }}" controls preload="none"></video>
+        {% elif creative.audio %}
+            <audio class="ad-banner__media" src="{{ creative.audio.url }}" controls preload="none"></audio>
+        {% endif %}
+    </aside>
+{% endif %}

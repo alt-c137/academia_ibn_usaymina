@@ -44,6 +44,8 @@ LOCAL_APPS = [
     "apps.books",        # продажа печатных книг (отключаемый модуль)
     "apps.payments",     # оплата обучения и рассрочка (отключаемый модуль)
     "apps.forum",        # форум: статьи, темы, вопросы (отключаемый модуль)
+    "apps.ads",          # реклама: слоты и креативы + Google AdSense
+    "apps.hadith",       # хадисы: коллекция и «хадис дня»
 ]
 
 INSTALLED_APPS = [
@@ -175,3 +177,5 @@ from django.conf.locale.ru import formats as ru_formats  # noqa: E402
 
 ru_formats.DATETIME_FORMAT = "d.m.Y H:i"
 ru_formats.DATE_FORMAT = "d.m.Y"
+
+

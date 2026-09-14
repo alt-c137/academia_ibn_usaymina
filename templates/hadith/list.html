@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Хадисы — {{ site_title }}{% endblock %}
+{% block description %}Хадисы дня и подборка изречений Пророка ﷺ.{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="wrap wrap--narrow">
+        <p class="eyebrow reveal">Сунна</p>
+        <h1 class="sec-title reveal">Хадисы</h1>
+        <p class="sec-lead reveal">Изречения Пророка ﷺ — по одному на каждый день.</p>
+
+        {% if hadith_of_the_day %}
+            <div class="hadith-day reveal">
+                <p class="hadith-day__label">Хадис дня</p>
+                <p class="hadith-day__text">{{ hadith_of_the_day.text }}</p>
+                <p class="hadith-day__meta">
+                    {% if hadith_of_the_day.narrator %}Передал: {{ hadith_of_the_day.narrator }}. {% endif %}
+                    {% if hadith_of_the_day.source %}{{ hadith_of_the_day.source }}{% endif %}
+                </p>
+            </div>
+        {% endif %}
+
+        <div class="hadith-list">
+            {% for hadith in hadiths %}
+                <article class="hadith-card reveal">
+                    <p class="hadith-card__text">{{ hadith.text }}</p>
+                    <p class="hadith-card__meta">
+                        {% if hadith.narrator %}Передал: {{ hadith.narrator }}. {% endif %}
+                        {% if hadith.source %}{{ hadith.source }}{% endif %}
+                    </p>
+                </article>
+            {% empty %}
+                <p class="sec-lead">Хадисы скоро появятся — учитель наполняет раздел.</p>
+            {% endfor %}
+        </div>
+
+        {% include "includes/pagination.html" %}
+    </div>
+</section>
+{% endblock %}

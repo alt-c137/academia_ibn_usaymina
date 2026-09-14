@@ -26,9 +26,31 @@ from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, View
 
 from apps.core.models import SiteInfo
+from apps.core.sections import require_section
 from apps.forum.forms import PostForm, ThreadForm
 from apps.forum.models import Board, Post, Thread
 from apps.teacher.permissions import is_moderator
+
+
+class SectionRequiredMixin:
+    """Раздел можно выключить одним чекбоксом в админке — тогда 404."""
+
+    def dispatch(self, request, *args, **kwargs):
+        require_section("forum_enabled")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class ForumHomeView(SectionRequiredMixin, ListView):
+    """Список разделов с числом тем и датой последней активности."""
+
+    template_name = "forum/home.html"
+    context_object_name = "boards"
+
+    def get_queryset(self):
+        return Board.objects.filter(is_published=True).annotate(
+            threads_pub=Count("threads", filter=models.Q(threads__is_approved=True)),
+            last_activity=Max("threads__posts__created_at"),
+        )
 
 
 def forum_comments_open() -> bool:
@@ -46,20 +68,7 @@ def can_answer(user, thread: Thread) -> bool:
     return True
 
 
-class ForumHomeView(ListView):
-    """Список разделов с числом тем и датой последней активности."""
-
-    template_name = "forum/home.html"
-    context_object_name = "boards"
-
-    def get_queryset(self):
-        return Board.objects.filter(is_published=True).annotate(
-            threads_pub=Count("threads", filter=models.Q(threads__is_approved=True)),
-            last_activity=Max("threads__posts__created_at"),
-        )
-
-
-class BoardView(DetailView):
+class BoardView(SectionRequiredMixin, DetailView):
     """Темы раздела: публичные одобренные + свои (в т.ч. на модерации)."""
 
     template_name = "forum/board.html"
@@ -91,7 +100,7 @@ class BoardView(DetailView):
         return context
 
 
-class ThreadView(DetailView):
+class ThreadView(SectionRequiredMixin, DetailView):
     """Тема + ответы + форма ответа (если разрешено)."""
 
     template_name = "forum/thread.html"
@@ -197,7 +206,7 @@ class ThreadView(DetailView):
         return self.render_to_response(context)
 
 
-class ThreadCreateView(LoginRequiredMixin, CreateView):
+class ThreadCreateView(SectionRequiredMixin, LoginRequiredMixin, CreateView):
     """Новая тема. Учителя/админы публикуются сразу, остальные — на модерацию."""
 
     template_name = "forum/thread_form.html"

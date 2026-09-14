@@ -444,8 +444,42 @@ class Command(BaseCommand):
             enrollment=enrollment, date=date(2026, 9, 8), defaults={"present": True}
         )
 
+        # --- Хадисы: демо-коллекция для «хадиса дня» ----------------------------
+        from apps.hadith.models import Hadith
+
+        demo_hadiths = [
+            ("Действия оцениваются по намерениям, и каждому человеку — то, что он намеревался.",
+             "Умар ибн аль-Хаттаб", "Бухари, №1; Муслим, №1907"),
+            ("Не гневается — и не будет спрошен сильный в день Суда.",
+             "Абу Хурайра", "Бухари, №6114"),
+            ("Кто уверовал в Аллаха и Последний день — пусть говорит благое или молчит.",
+             "Абу Хурайра", "Бухари, №6018; Муслим, №47"),
+            ("Лучшие из вас — те, кто лучше всех относится к своим жёнам.",
+             "Ибн Аббас", "ат-Тирмизи, №1162"),
+            ("Стремись к тому, что полезно тебе, и проси помощи у Аллаха и не бессильствуй.",
+             "Абу Хурайра", "Муслим, №2699"),
+        ]
+        for order, (text, narrator, source) in enumerate(demo_hadiths, start=1):
+            Hadith.objects.update_or_create(
+                text=text, defaults={"narrator": narrator, "source": source,
+                                     "is_published": True},
+            )
+
         # --- Форум: разделы и демо-темы -----------------------------------------
         from apps.forum.models import Board, Post as ForumPost, Thread
+
+        # --- Рекламные слоты (пустые — креативы кладёт админ) -------------------
+        from apps.ads.models import AdSlot
+
+        for location, name in [
+            ("header", "Баннер под шапкой"),
+            ("sidebar", "Боковой баннер"),
+            ("between_posts", "В ленте главной"),
+            ("footer", "Над подвалом"),
+        ]:
+            AdSlot.objects.update_or_create(
+                location=location, defaults={"name": name, "is_active": True},
+            )
 
         forum_boards = [
             ("Статьи", "stati", "Разборы и переводы от преподавателей", 1),

@@ -13,16 +13,30 @@ def site_info(request):
     site = SiteInfo.load()
     context = {
         "site": site,
+        # Алиас по ТЗ: один и тот же объект настроек сайта
+        "site_settings": site,
         # Название в шапке: сначала из админки (меняется на лету),
         # затем из .env (SITE_NAME), затем запасной вариант.
         "site_title": (site.site_name if site else "") or settings.SITE_NAME,
         "has_exams": django_apps.is_installed("apps.exams"),
         "has_assignments": django_apps.is_installed("apps.assignments"),
         "has_grading": django_apps.is_installed("apps.grading"),
-        "has_library": django_apps.is_installed("apps.library"),
+        # Библиотека/форум: модуль установлен И включён в настройках сайта
+        "has_library": (
+            django_apps.is_installed("apps.library")
+            and (site is None or site.library_enabled)
+        ),
         "has_news": django_apps.is_installed("apps.news"),
         "has_meetings": django_apps.is_installed("apps.meetings"),
-        "has_forum": django_apps.is_installed("apps.forum"),
+        "has_hadith": (
+            django_apps.is_installed("apps.hadith")
+            and (site is None or site.hadith_enabled)
+        ),
+        # Форум: показываем в меню и при выключенном комментарии
+        "has_forum": (
+            django_apps.is_installed("apps.forum")
+            and (site is None or site.forum_enabled)
+        ),
         "has_payments": django_apps.is_installed("apps.payments"),
         # Книги: модуль включён И переключатель в админке включён
         # (нет записи в админке — считаем включённым)

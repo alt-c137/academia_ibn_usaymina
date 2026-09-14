@@ -27,12 +27,14 @@
     --danger: #A8402F;
     --danger-soft: #F7E4E0;
     --success: #1F6B45;
-    --success-soft: #E2ECE4;
-    --warning: #8A6116;
-    --warning-soft: #F6EDD6;
+    --success-soft: #DCEFD9;  /* было #E2ECE4 — совпадало с accent-soft */
+    --warning: #96530F;       /* заметно рыжее — не путается с золотом */
+    --warning-soft: #FBE0B8;  /* было #F6EDD6 — сливалось с gold-soft */
 
     --shadow: 0 14px 36px rgba(28, 36, 26, 0.12);
     --shadow-sm: 0 6px 20px rgba(28, 36, 26, 0.09);
+    --shadow-card: 0 12px 32px rgba(28, 36, 26, 0.14);        /* карточки: приподняты */
+    --shadow-card-hover: 0 16px 40px rgba(28, 36, 26, 0.18);
     --radius: 16px;
     --radius-sm: 10px;
     --border: 1px solid var(--line);

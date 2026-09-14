@@ -24,6 +24,7 @@ urlpatterns = [
     path("library/", include("apps.library.urls")),          # библиотека материалов
     path("books/", include("apps.books.urls")),              # продажа книг (отключаемый модуль)
     path("payments/", include("apps.payments.urls")),        # мои платежи (отключаемый модуль)
+    path("hadith/", include("apps.hadith.urls")),            # хадисы (отключаемый модуль)
     path("forum/", include("apps.forum.urls")),              # форум (отключаемый модуль)
     path("teacher/", include("apps.teacher.urls")),          # учительская: проверка
     path("meetings/", include("apps.meetings.urls")),        # онлайн-встречи (созвоны)

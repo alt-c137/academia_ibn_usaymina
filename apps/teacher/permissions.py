@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 
 TEACHER_GROUP = "Учитель"
+FORUM_MODERATOR_GROUP = "Модератор форума"
 
 
 def is_teacher(user) -> bool:
@@ -24,8 +25,15 @@ def is_teacher(user) -> bool:
 
 
 def is_moderator(user) -> bool:
-    """Модератор контента (форум) — те же учителя и админы."""
-    return is_teacher(user)
+    """Модератор контента: учителя/админы или группа «Модератор форума»."""
+    if not user.is_authenticated:
+        return False
+    return (
+        user.is_superuser
+        or user.is_staff
+        or user.groups.filter(name=TEACHER_GROUP).exists()
+        or user.groups.filter(name=FORUM_MODERATOR_GROUP).exists()
+    )
 
 
 class TeacherRequiredMixin(LoginRequiredMixin):
